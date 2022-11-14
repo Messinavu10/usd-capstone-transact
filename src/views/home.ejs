@@ -18,8 +18,7 @@
                     <div class="card-body">
                         <% if (isAuthenticated) { %>
                             <h5 class="card-description">Welcome!</h5>
-                            <a class="btn btn-primary" href="/profile" "role="button">Get my profile</a>
-                            <a class="btn btn-primary" href="/tenant" "role="button">Get my tenant</a>
+                            <a class="btn btn-primary" href="/id" "role="button">Get my ID Token</a>
                         <% }  else if (configured==true){ %>
                             <h5 class="card-description">Sign-in to access your resources</h5>
                         <% } else { %>
