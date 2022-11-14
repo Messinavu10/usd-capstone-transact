@@ -30,6 +30,8 @@ exports.getIdPage = (req, res, next) => {
 }
 
 exports.getProfilePage = async(req, res, next) => {
+
+    // This does not work for Azure AD B2C (customer facing application)
     let profile;
     console.log(req.session["graphAPI"].accessToken);
 
@@ -43,6 +45,8 @@ exports.getProfilePage = async(req, res, next) => {
 }
 
 exports.getTenantPage = async(req, res, next) => {
+
+     // This does not work for Azure AD B2C (customer facing application)
     let tenant;
 
     try {
