@@ -21,6 +21,17 @@
                             <a class="btn btn-primary" href="/id" "role="button">Get my ID Token</a>
                         <% }  else if (configured==true){ %>
                             <h5 class="card-description">! Welcome !</h5>
+                            <div class="btn-group ml-auto dropleft">
+                                <% if (configured) { %>
+                                    <% if (isAuthenticated) { %>
+                                        <a class="btn btn-secondary" href="/id" role="button">ID</a>
+                                        <a class="btn btn-success" href="/signout" role="button">Sign-out</a>
+                                    <% } else { %>
+                                        <a class="btn btn-secondary" href="/signin" role="button">Sign-in</a>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        
                             <h5 class="card-description">Please Sign-in to either verify or issue credentials</h5>
                         <% } else { %>
                             <h5 class="card-description">Uh-oh seems there is an issue!, please configure appSettings.json and restart the app</h5>

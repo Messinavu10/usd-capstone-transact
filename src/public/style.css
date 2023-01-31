@@ -2,6 +2,10 @@ h1 {
     color: rgb(56, 78, 241);
 }
 
+body {
+    background-color: rgb(245, 174, 76);
+}
+
 #card-div {
     min-width: 40%;
     margin: 5% auto 5% auto;
@@ -24,4 +28,3 @@ h1 {
     width: 100%;
     text-align: center;
 }
-
