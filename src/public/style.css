@@ -3,9 +3,21 @@ h1 {
 }
 
 body {
-    background-color: rgb(245, 174, 76);
+    background-color: rgb(202, 202, 202);
 }
 
+.img-fluid {
+    width: 150px;
+    height: auto;
+    margin-top: 6px;
+
+}
+
+
+.card-body{
+      background-color: rgb(255, 255, 255);
+      opacity: .95;
+    }
 #card-div {
     min-width: 40%;
     margin: 5% auto 5% auto;
