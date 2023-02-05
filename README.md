@@ -68,3 +68,21 @@ MSAL Node has an in-memory cache by default. This sample also features a persist
 * [Initializing a confidential client app with MSAL Node](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/initialize-confidential-client-application.md)
 * [MSAL Node Configuration options](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md)
 * [Scenario: A web app that calls web APIs](https://docs.microsoft.com/azure/active-directory/develop/scenario-web-app-call-api-overview)
+
+---
+
+# Scenario 
+
+## As an issuer (For example: USD) 
+
+- USD administrator department go on Transact App and register a new organization issuer as USD 
+- Next, it will pull out its own existing student database, and register each student under its organization 
+- Once issue the credential, it can't be deleted, but it can have an expiration date 
+
+## As a holder (For example: student) 
+
+- Once he/she gets the credential from the issuer, he/she can access it by logging in to Transact Account and show it to the verifier. 
+
+## As a verifier (For example: USD sports ticketing office) 
+
+- Verifier are able to scan the QR code of any credential holder, and it will show whether the holder is a valid USD student. 
