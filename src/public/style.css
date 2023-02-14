@@ -1,7 +1,34 @@
 h1 {
-    color: red;
+    color: rgb(56, 78, 241);
 }
 
+body {
+    background-color: rgba(55, 142, 255, 0.795);
+}
+.logo {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 15px; 
+    justify-content:center;
+}
+.center {
+    display: flex;
+    justify-content: center;
+}
+  
+.img-fluid {
+    width: 75px;
+    height: auto;
+    margin-top: 6px;
+
+}
+
+
+.card-body{
+      background-color: rgb(255, 255, 255);
+      opacity: .95;
+    }
 #card-div {
     min-width: 40%;
     margin: 5% auto 5% auto;
@@ -24,4 +51,3 @@ h1 {
     width: 100%;
     text-align: center;
 }
-

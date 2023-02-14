@@ -6,7 +6,8 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="/style.css">
-        <title>Home</title>
+        <title>Digital Credentials</title>
+
     </head>
     <body>
 
@@ -17,17 +18,43 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <% if (isAuthenticated) { %>
-                            <h5 class="card-description">Welcome!</h5>
                             <a class="btn btn-primary" href="/id" "role="button">Get my ID Token</a>
                         <% }  else if (configured==true){ %>
-                            <h5 class="card-description">Sign-in to access your resources</h5>
+                            <div class="btn-group ml-auto dropleft">
+                                <% if (configured) { %>
+                                    <% if (isAuthenticated) { %>
+                                        <a class="btn btn-secondary" href="/id" role="button">ID</a>
+                                        <a class="btn btn-success" href="/signout" role="button">Sign-out</a>
+                                    <% } else { %>
+                                        <a class="btn btn-secondary" href="/signin" role="button">Sign-in</a>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        
+                            <h5 class="card-description">Please Sign-in to either verify or issue credentials</h5>
                         <% } else { %>
-                            <h5 class="card-description">Please configure appSettings.json and restart the app</h5>
+                            <h5 class="card-description">Uh-oh seems there is an issue!, please configure appSettings.json and restart the app</h5>
                         <% } %>
+
                     </div>
                 </div>
             </div>
         </div>
+
+            <div id="card-div" class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                            <div class="center">
+                                <img id="logo" src="/googleqr.png" alt="google play store qr code"  style="width:10em">
+                                <img id ="logo" src="/appleqr.png" alt="app store qr code"   style="width:10em">
+                            </div>
+                            <h10 class="card-description">REQUIRED: Install MS Authenticator app</h5>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <%- include('includes/footer'); %>
 
