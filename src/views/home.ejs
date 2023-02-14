@@ -7,112 +7,6 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="/style.css">
         <title>Digital Credentials</title>
-        <style>
-
-body {
-    margin: auto;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: auto;
-    background: linear-gradient(315deg, rgb(249, 214, 76) 3%, rgb(252, 156, 84) 38%, rgb(253, 94, 83) 68%, rgb(75, 61, 96) 98%);
-    animation: gradient 10s ease infinite;
-    background-size: 400% 400%;
-    background-attachment: fixed;
-}
-
-@keyframes gradient {
-    0% {
-        background-position: 0% 0%;
-    }
-    50% {
-        background-position: 100% 100%;
-    }
-    100% {
-        background-position: 0% 0%;
-    }
-}
-
-.wave {
-    background: rgb(255 255 255 / 25%);
-    border-radius: 1000% 1000% 0 0;
-    position: fixed;
-    width: 200%;
-    height: 12em;
-    animation: wave 5s -3s linear infinite;
-    transform: translate3d(0, 0, 0);
-    opacity: 0.8;
-    bottom: 0;
-    left: 0;
-    z-index: -1;
-}
-
-.wave:nth-of-type(2) {
-    bottom: -1.25em;
-    animation: wave 18s linear reverse infinite;
-    opacity: 0.8;
-}
-
-.wave:nth-of-type(3) {
-    bottom: -2.5em;
-    animation: wave 20s -1s reverse infinite;
-    opacity: 0.9;
-}
-
-@keyframes wave {
-    2% {
-        transform: translateX(1);
-    }
-
-    25% {
-        transform: translateX(-25%);
-    }
-
-    50% {
-        transform: translateX(-50%);
-    }
-
-    75% {
-        transform: translateX(-25%);
-    }
-
-    100% {
-        transform: translateX(1);
-    }
-}        
-
-
-
-
-.myButton {
-	box-shadow: 0px 0px 0px 0px #ffffff;
-	background-color:transparent;
-	border-radius:22px;
-	border:2px solid rgba(0, 0, 0, .4);
-	cursor:pointer;
-    color: rgba(0, 0, 0, .4);
-	font-family:Arial;
-	font-size:18px;
-    font-weight: 900;
-	padding:16px 76px;
-    justify-content: center;
-  align-items: center;
-  text-align: center;
-
-
-
-}
-.myButton:hover {
-	background-color:transparent;
-}
-.myButton:active {
-	position:center;
-	top:1px;
-}
-
-.center {
-  text-align: center;
-  color: rgba(0, 0, 0, .4);
-}
-</style>
 
     </head>
     <body>
@@ -141,12 +35,26 @@ body {
                         <% } else { %>
                             <h5 class="card-description">Uh-oh seems there is an issue!, please configure appSettings.json and restart the app</h5>
                         <% } %>
-                        <img src="/frame.png" alt="app store qr code"  class="img-fluid" >
 
                     </div>
                 </div>
             </div>
         </div>
+
+            <div id="card-div" class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                            <div class="center">
+                                <img id="logo" src="/googleqr.png" alt="google play store qr code"  style="width:10em">
+                                <img id ="logo" src="/appleqr.png" alt="app store qr code"   style="width:10em">
+                            </div>
+                            <h10 class="card-description">REQUIRED: Install MS Authenticator app</h5>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <%- include('includes/footer'); %>
 

@@ -3,11 +3,22 @@ h1 {
 }
 
 body {
-    background-color: rgb(202, 202, 202);
+    background-color: rgba(55, 142, 255, 0.795);
 }
-
+.logo {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 15px; 
+    justify-content:center;
+}
+.center {
+    display: flex;
+    justify-content: center;
+}
+  
 .img-fluid {
-    width: 150px;
+    width: 75px;
     height: auto;
     margin-top: 6px;
 
