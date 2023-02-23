@@ -39,7 +39,7 @@ const appSettings = () => {
         },
         "resources": {
             "graphAPI": {
-                "callingPageRoute": "/profile",
+                "callingPageRoute": "/issuer",
                 "endpoint": "https://graph.microsoft.com/v1.0/{subjectId}",
                 "scopes": ["https://graph.microsoft.com/User.Read.All"]
             },

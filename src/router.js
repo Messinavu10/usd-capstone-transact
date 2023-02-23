@@ -10,9 +10,12 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/redirect', authProvider.handleRedirect);
 
     // secure routes
-    router.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
-    router.get('/profile', authProvider.isAuthenticated, authProvider.getToken, mainController.getProfilePage); // get token for this route to call web API
-    router.get('/tenant', authProvider.isAuthenticated, authProvider.getToken, mainController.getTenantPage) // get token for this route to call web API
+    router.get('/issuer', mainController.getIssuerPage);
+    router.get('/manage', mainController.getManagePage);
+    router.get('/create',  mainController.getCreatePage);
+    router.get('/issuecreds', mainController.getIssueCredentialsPage); 
+    router.get('/deletecreds', mainController.getDeleteCredentialsPage);
+    //will add isauthenticated after testing
 
     // 404
     router.get('*', (req, res) => res.status(404).redirect('/404.html'));
