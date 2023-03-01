@@ -2,5 +2,10 @@
     <a class="navbar-brand" href="/">
         <img src="/transactlogo.png" alt="logo"  class="img-fluid" >
         <img src="/usdmedallion.png" alt="u of san diego logo"  class="img-fluid">
+     
+     
+        <% if (isAuthenticated) { %>
+            <a class="btn btn-success" href="/signout" role="button">Sign-out</a>
+            <% }%>
     </a>
 </nav>

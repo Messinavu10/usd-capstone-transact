@@ -29,33 +29,97 @@ exports.getIdPage = (req, res, next) => {
     res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
 
-exports.getProfilePage = async(req, res, next) => {
+exports.getIssuerPage = (req, res, next) => {
 
-    // This does not work for Azure AD B2C (customer facing application)
-    let profile;
-    console.log(req.session["graphAPI"].accessToken);
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
 
-    try {
-        profile = await fetchManager.callAPI(req.app.locals.appSettings.resources.graphAPI.endpoint, req.session["graphAPI"].accessToken);        
-    } catch (error) {
-        console.log(error)
-    }
+    res.render('issuer', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 
-    res.render('profile', { isAuthenticated: req.session.isAuthenticated, profile: profile, configured: isConfigured(req) });
+}
+exports.getManagePage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('manage', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+
+}
+exports.getCreatePage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('create', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+
+}
+exports.getIssueCredentialsPage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('issuecreds', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+
+}
+exports.getDeleteCredentialsPage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('deletecreds', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+
+}
+exports.getVpage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('verifier', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+}
+exports.getHolderpage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('holder', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+}
+exports.getExistingCredTypes = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('existingcredtypes', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
 
-exports.getTenantPage = async(req, res, next) => {
-
-     // This does not work for Azure AD B2C (customer facing application)
-    let tenant;
-
-    try {
-        // Getting tenant information requires Admin level 
-        // permission
-        tenant = await fetchManager.callAPI(req.app.locals.appSettings.resources.armAPI.endpoint, req.session["armAPI"].accessToken);   
-    } catch (error) {
-        console.log(error)
-    }
-
-    res.render('tenant', { isAuthenticated: req.session.isAuthenticated, tenant: tenant.value[0], configured: isConfigured(req) });
-}
