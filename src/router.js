@@ -15,7 +15,12 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/create',  mainController.getCreatePage);
     router.get('/issuecreds', mainController.getIssueCredentialsPage); 
     router.get('/deletecreds', mainController.getDeleteCredentialsPage);
+    router.get('/verifier', mainController.getVpage);
+    router.get('/holder', mainController.getHolderpage);
+    router.get('/existingcredtypes', mainController.getExistingCredTypes);
+
     //will add isauthenticated after testing
+
 
     // 404
     router.get('*', (req, res) => res.status(404).redirect('/404.html'));

@@ -14,8 +14,9 @@
 <body>
 
     <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured}); %>
-
-
+         <div id="card-div" class="col-md-3">
+            Placeholder for where user info goes
+         </div>
         <div id="card-div" class="col-md-3">
             <div class="card text-center">
                 <div class="card-body">
@@ -29,8 +30,8 @@
             <div id="card-div" class="col-md-3">
                 <div class="card text-center">
                     <div class="card-body">
-                        <a class="btn btn-primary" href="/manage" role= "button">Manage Credentials</a>
-                        <a class="btn btn-primary" href="/create" role="button">Create Credentials</a>
+                        <a class="btn btn-primary" href="/manage" role= "button">Manage Credential Type</a>
+                        <a class="btn btn-primary" href="/create" role="button">Create Credential Type</a>
                     </div>
                 </div>
             </div>

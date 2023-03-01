@@ -89,3 +89,37 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
     res.render('deletecreds', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 
 }
+exports.getVpage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('verifier', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+}
+exports.getHolderpage = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('holder', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+}
+exports.getExistingCredTypes = (req, res, next) => {
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
+
+    res.render('existingcredtypes', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
+}
+
