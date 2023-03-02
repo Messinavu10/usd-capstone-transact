@@ -37,6 +37,36 @@
             </div>
         </div>
 
+        <div class="table-area-div">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Claim</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (const [key, value] of Object.entries(claims)) { %>
+                        <% if (key === 'attributes') { %>
+                            <tr>
+                                <td><%= key %></td>
+                                <td>
+                                    <% for (const [key1, value1] of Object.entries(claims.attributes)) { %>
+                                        <p><%= value1.attributeName %>: <%= value1.attributeValue %></p>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% } else { %>
+                        <tr>
+                            <td><%= key %></td>
+                            <td><%= value %></td>
+                        </tr>
+                        <% } %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div> 
+
         <%- include('includes/footer'); %>
 
             <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
