@@ -19,12 +19,16 @@
     "express-session": "^1.17.1",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^1.12.3",
+    "mssql": "^9.1.1",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
   },
   "nodemonConfig": {
-    "ignore": ["src/data/cache.json", "README.md"]
+    "ignore": [
+      "src/data/cache.json",
+      "README.md"
+    ]
   }
 }
