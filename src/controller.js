@@ -1,5 +1,8 @@
 const sql = require('mssql');
 
+// create another service file. 
+const { getQueryRole } = require("services");
+
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
     password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
@@ -67,7 +70,11 @@ const isConfigured = (req) => {
 
 exports.getHomePage = (req, res, next) => {
 
-    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req) });
+    // an array of objects 
+    //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
+    var queryRoles = getQueryRole() // call the functions
+    
+    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req), queryRoles });
 }
 
 exports.getIssuerPage = (req, res, next) => {
