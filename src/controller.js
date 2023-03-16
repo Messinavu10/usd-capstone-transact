@@ -83,14 +83,22 @@ const isConfigured = (req) => {
 exports.getHomePage = async (req, res, next) => {
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
-//   var queryRoles = await getRole('aaa@domain.com'); // call the functions
-//   console.log(queryRoles);
+  if (req.session?.idTokenClaims?.emails[0]) {
+    var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
 
-  res.render("home", {
-    isAuthenticated: req.session.isAuthenticated,
-    configured: isConfigured(req),
-    // queryRoles,
-  });
+    res.render("home", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      queryRoles: queryRoles["recordset"][0]["roleName"],
+    });
+  } else {
+    res.render("home", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      queryRoles: ""
+    });
+  }
 };
 
 exports.getIssuerPage = (req, res, next) => {

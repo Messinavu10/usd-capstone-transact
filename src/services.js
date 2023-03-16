@@ -24,7 +24,7 @@ const poolConnect = () => {
     FROM USERS AS u
     INNER JOIN userRoles AS ur ON u.userID = ur.userID
     INNER JOIN ROLES AS r ON r.roleID = ur.roleID
-    WHERE USERS.userEmail = '${userEmail}';
+    WHERE u.userEmail = '${userEmail}';
     `
     var poolConnection = await poolConnect();
     
