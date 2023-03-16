@@ -1,3 +1,5 @@
+const sql = require('mssql');
+
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
     password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
@@ -17,10 +19,14 @@ const connect = async() => {
     return poolConnection;
 }
 
-export const getQueryRole = (userEmail, poolConnection) => {
+export const getRole = (userEmail, poolConnection) => {
     var q = `
-    select from rowsTable, userRolesTable,
-    make a sql statement to filter the role of the user `
+    SELECT r.roleName
+    FROM USERS AS u
+    INNER JOIN userRoles AS ur ON u.userID = ur.userID
+    INNER JOIN ROLES AS r ON r.roleID = ur.roleID
+    WHERE USERS.userEmail = '${email}';
+    `
     var resultSet = await poolConnection.request().query(q);
 
     return resultSet; // array of roles from 0 to 2 roles

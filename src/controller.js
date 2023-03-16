@@ -1,7 +1,7 @@
 const sql = require('mssql');
 
 // create another service file. 
-const { getQueryRole } = require("services");
+const { getRole } = require("services");
 
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
