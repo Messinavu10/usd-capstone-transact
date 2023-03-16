@@ -14,21 +14,23 @@ const config = {
     }
 }
 
-const connect = async() => {
-    var poolConnection = await sql.connect(config);
-    return poolConnection;
+const poolConnect = () => {
+    return sql.connect(config);
 }
 
-export const getRole = (userEmail, poolConnection) => {
+ const getRole = async(userEmail) => {
     var q = `
     SELECT r.roleName
     FROM USERS AS u
     INNER JOIN userRoles AS ur ON u.userID = ur.userID
     INNER JOIN ROLES AS r ON r.roleID = ur.roleID
-    WHERE USERS.userEmail = '${email}';
+    WHERE USERS.userEmail = '${userEmail}';
     `
+    var poolConnection = await poolConnect();
+    
     var resultSet = await poolConnection.request().query(q);
 
+    console.log(resultSet);
     return resultSet; // array of roles from 0 to 2 roles
 
 }
@@ -38,7 +40,7 @@ async function connectAndQuery(email) {
     try {
         console.log(JSON.stringify(config),"\n\n");
 
-        var poolConnection = await connect();
+        var poolConnection = await poolConnect();
 
         console.log("Reading rows from the Table...");
         var q = `SELECT USERS.userName, USERS.userEmail, ua.attributeName, ua.attributeValue
@@ -73,3 +75,4 @@ async function connectAndQuery(email) {
 }
 
 
+module.exports = getRole;
