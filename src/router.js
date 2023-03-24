@@ -22,7 +22,7 @@ const getRoutes = (mainController, authProvider, router)=>{
     //will add isauthenticated after testing
 
 
-    // 404!
+    // 404
     router.get('*', (req, res) => res.status(404).redirect('/404.html'));
     
     return router;
