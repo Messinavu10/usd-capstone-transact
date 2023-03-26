@@ -28,39 +28,6 @@
                     </div>
                 </div>
             </div>
-            <script>
-                // Initialize MSAL library by using the following code
-                const msalConfig = {
-                    auth: {
-                        clientId: process.env.AD_APR_CLIENT_ID,
-                        authority: `https://login.microsoftonline.com/7b79d002-1780-49a7-804f-8437a1f0222d/oauth2/v2.0/token`,
-                        clientSecret: process.env.AD_API_CLIENT_SECRET,
-                    },
-                    system: {
-                        loggerOptions: {
-                            loggerCallback(loglevel, message, containsPii) {
-                                console.log(message);
-                            },
-                            piiLoggingEnabled: false,
-                            logLevel: msal.LogLevel.Verbose,
-                        }
-                    }
-                };
-                const cca = new msal.ConfidentialClientApplication(msalConfig);
-                const msalClientCredentialRequest = {
-                    scopes: ["6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default"],
-                    skipCache: false,
-                };
-                module.exports.msalCca = cca;
-                module.exports.msalClientCredentialRequest = msalClientCredentialRequest;
-
-                // Acquire an access token
-                const result = await mainApp.msalCca.acquireTokenByClientCredential(mainApp.msalClientCredentialRequest);
-                if (result) {
-                    accessToken = result.accessToken;
-                    console.log(accessToken)//@TODO remove, debugging only
-                }
-            </script>
             <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
                 integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
                 crossorigin="anonymous"></script>
