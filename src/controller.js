@@ -1,7 +1,8 @@
 const axios = require('axios');
 const sql = require('mssql');
 const qs = require('qs');
-
+const jmespath = require('jmespath');
+const verifiedid = require('./services/verified_id');
 
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
@@ -70,70 +71,9 @@ const isConfigured = (req) => {
 
 exports.getHomePage = (req, res, next) => {
 
-    let access_token = '';
-    let contracts = '';
-    axios({
-        method: 'post',
-        url: 'https://login.microsoftonline.com/7b79d002-1780-49a7-804f-8437a1f0222d/oauth2/v2.0/token',
-        headers:{'content-Type':'application/x-www-form-urlencoded'},
-        data: qs.stringify({grant_type: 'client_credentials', 
-            client_secret:'rL98Q~JlmJeu5.ZOATdEalWxANHbsyD9WB4aUbmx',
-            client_id:'4af44c25-ae3f-4436-b42e-53eda45413cd',
-           redirect_uri:'http://localhost',
-            scope:'6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default'
-        })
-      })
-      .then(function(postResponse){
-        access_token = postResponse.data.access_token;
-        //console.log(access_token);
-        axios({
-            method: 'get',
-            url: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/6dd1670d-05da-da07-006e-6655fe15ccb3/contracts',
-            headers:{'Authorization':('Bearer ' + access_token)}
-          })
-          .then(function(getResponse){
-            contracts = getResponse.data.value;
-            console.log(contracts);
-          })
-          .catch(function (error) {
-            if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
-              console.log(error.response.data);
-              console.log(error.response.status);
-              console.log(error.response.headers);
-            } else if (error.request) {
-              // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
-              console.log(error.request);
-            } else {
-              // Something happened in setting up the request that triggered an Error
-              console.log('Error', error.message);
-            }
-            console.log(error.config);
-          });
-      })
-      .catch(function (error) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-        console.log(error.config);
-      });
-      
-    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req) });
+    var lis_creds=verifiedid.listCredType();
+    
+    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req),list:lis_creds});
 
 }
 
@@ -233,4 +173,3 @@ exports.getExistingCredTypes = (req, res, next) => {
 
     res.render('existingcredtypes', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
-
