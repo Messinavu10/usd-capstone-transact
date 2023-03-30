@@ -4,6 +4,8 @@ const qs = require('qs');
 const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
 
+
+
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
     password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
@@ -69,12 +71,14 @@ const isConfigured = (req) => {
     }
 }
 
-exports.getHomePage = (req, res, next) => {
+exports.getHomePage = async (req, res, next) => {
+    let results;
+    results = await verifiedid.listCredType();
 
-    var lis_creds=verifiedid.listCredType();
-    
-    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req),list:lis_creds});
-
+    let list={ //CHANGE BACK TO LIS_CREDS
+        creds: results
+    }
+    res.render('home', { isAuthenticated: req.session.isAuthenticated, configured: isConfigured(req),list:list});
 }
 
 exports.getIssuerPage = (req, res, next) => {

@@ -24,11 +24,14 @@
                             <a class="btn btn-secondary" href="/issuer" role="button">Issuer</a>
                             <a class="btn btn-secondary" href="/verifier" role="button">verifier</a>
                             <a class="btn btn-secondary" href="/holder" role="button">holder</a>
-                            <ol>
-                            <% for(var i=0; i<5 ; i++) { %>    
-                                <li><%= list[i] %></li>
-                                <% } %>
-                            </ol>
+                            
+                            <ul>
+                                <% list.creds.forEach((creds)=>{%>
+                                      <li><%=creds%></li> 
+                                <%});%>
+                            </ul>
+                        
+
 
                             <% } else if (configured==true){ %>
                                 <div class="btn-group ml-auto dropleft">
