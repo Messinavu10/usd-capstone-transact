@@ -183,8 +183,9 @@ exports.getExistingCredTypes = async (req, res, next) => {
 
   var queryCreds = await getCreds(req.session.idTokenClaims.emails[0]);
 
-
+  console.log("list of creds")
   console.log(list)
+  console.log("query creds")
   console.log(queryCreds)
 
   res.render('existingcredtypes', { 

@@ -19,16 +19,16 @@ const poolConnect = () => {
 }
  
 const getCreds = async(email) => {
-    var q = 'SELECT ua.attributeName, ua.attributeValue
-    FROM USERS as u
-    INNER JOIN UserAttributes AS ua ON u.userID = ua.userID
-    WHERE u.userEmail = '${email}';'
-        
+
     var poolConnection = await poolConnect();
 
+    var q = `
+        SELECT ua.attributeName, ua.attributeValue
+        FROM USERS as u
+        INNER JOIN UserAttributes AS ua ON u.userID = ua.userID
+        WHERE u.userEmail = '${email}';
+    `
     var resultSet = await poolConnection.request().query(q);
-
-    console.log(resultSet);
 
     return resultSet;
 }
