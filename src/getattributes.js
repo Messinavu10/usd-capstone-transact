@@ -18,12 +18,12 @@ const poolConnect = () => {
     return sql.connect(config);
 }
  
-const getCreds = async(email) => {
+const getAttributes = async(email) => {
 
     var poolConnection = await poolConnect();
 
     var q = `
-        SELECT ua.attributeName, ua.attributeValue
+        SELECT u.userName, u.userEmail, ua.attributeName, ua.attributeValue
         FROM USERS as u
         INNER JOIN UserAttributes AS ua ON u.userID = ua.userID
         WHERE u.userEmail = '${email}';
@@ -33,4 +33,4 @@ const getCreds = async(email) => {
     return resultSet;
 }
 
-module.exports = getCreds;
+module.exports = getAttributes;

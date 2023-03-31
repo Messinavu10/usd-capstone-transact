@@ -3,7 +3,7 @@ const sql = require('mssql');
 const qs = require('qs');
 const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
-const getCreds = require("./getcreds");
+const getAttributes = require("./getattributes");
 
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
@@ -165,7 +165,7 @@ exports.getHolderpage = (req, res, next) => {
 
     res.render('holder', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
-exports.getExistingCredTypes = async (req, res, next) => {
+exports.getExistingCredTypes = (req, res, next) => {
 
   const claims = {
       name: req.session.idTokenClaims.name,
@@ -174,22 +174,34 @@ exports.getExistingCredTypes = async (req, res, next) => {
       sub: req.session.idTokenClaims.sub
   };
 
-  let results;
-  results = await verifiedid.listCredType();
-
-  let list = { //CHANGE BACK TO LIS_CREDS
-      creds: results
-  }
-
-  var queryCreds = await getCreds(req.session.idTokenClaims.emails[0]);
-
-  console.log("list of creds")
-  console.log(list)
-  console.log("query creds")
-  console.log(queryCreds)
-
   res.render('existingcredtypes', { 
     isAuthenticated: req.session.isAuthenticated,
     configured: isConfigured(req)
   });
+}
+
+exports.getProfile = async (req, res, next) => {
+
+  const claims = {
+      name: req.session.idTokenClaims.name,
+      preferred_username: req.session.idTokenClaims.preferred_username,
+      oid: req.session.idTokenClaims.oid,
+      sub: req.session.idTokenClaims.sub
+  };
+
+  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
+
+  let userAttributes = {};
+  queryAttributes["recordset"].forEach( (element)  => {
+    userAttributes[element.attributeName] = element.attributeValue;
+  });
+
+  console.log(userAttributes);
+
+  res.render('profile', { 
+    isAuthenticated: req.session.isAuthenticated,
+    configured: isConfigured(req),
+    userAttributes: userAttributes
+  });
+  
 }
