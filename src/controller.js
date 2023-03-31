@@ -155,7 +155,7 @@ exports.getVpage = (req, res, next) => {
 
     res.render('verifier', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
-exports.getHolderpage = (req, res, next) => {
+exports.getHolderpage = async (req, res, next) => {
 
     const claims = {
         name: req.session.idTokenClaims.name,
@@ -163,6 +163,13 @@ exports.getHolderpage = (req, res, next) => {
         oid: req.session.idTokenClaims.oid,
         sub: req.session.idTokenClaims.sub
     };
+
+    let results;
+    results = await verifiedid.listCredType();
+
+    let list={ //CHANGE BACK TO LIS_CREDS
+        creds: results
+    }
 
     res.render('holder', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req) });
 }
