@@ -3,8 +3,7 @@ const sql = require('mssql');
 const qs = require('qs');
 const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
-
-
+const getCreds = require("./getcreds");
 
 const config = {
     user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
@@ -168,19 +167,28 @@ exports.getHolderpage = (req, res, next) => {
 }
 exports.getExistingCredTypes = async (req, res, next) => {
 
-    const claims = {
-        name: req.session.idTokenClaims.name,
-        preferred_username: req.session.idTokenClaims.preferred_username,
-        oid: req.session.idTokenClaims.oid,
-        sub: req.session.idTokenClaims.sub
-    };
+  const claims = {
+      name: req.session.idTokenClaims.name,
+      preferred_username: req.session.idTokenClaims.preferred_username,
+      oid: req.session.idTokenClaims.oid,
+      sub: req.session.idTokenClaims.sub
+  };
 
-    let results;
-    results = await verifiedid.listCredType();
+  let results;
+  results = await verifiedid.listCredType();
 
-    let list = { //CHANGE BACK TO LIS_CREDS
-        creds: results
-    }
+  let list = { //CHANGE BACK TO LIS_CREDS
+      creds: results
+  }
 
-    res.render('existingcredtypes', { isAuthenticated: req.session.isAuthenticated, claims: claims, configured: isConfigured(req)});
+  var queryCreds = await getCreds(req.session.idTokenClaims.emails[0]);
+
+
+  console.log(list)
+  console.log(queryCreds)
+
+  res.render('existingcredtypes', { 
+    isAuthenticated: req.session.isAuthenticated,
+    configured: isConfigured(req)
+  });
 }

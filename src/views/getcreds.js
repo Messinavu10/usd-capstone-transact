@@ -19,10 +19,10 @@ const poolConnect = () => {
 }
  
 const getCreds = async(email) => {
-    var q = ';'
+    var q = 'SELECT ;'
 
     var poolConnection = await poolConnect();
-    
+
     var resultSet = await poolConnection.request().query(q);
 
     console.log(resultSet);
