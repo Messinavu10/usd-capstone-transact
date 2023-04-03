@@ -1,6 +1,10 @@
-/** @format */
+const axios = require('axios');
+const sql = require('mssql');
+const qs = require('qs');
+const jmespath = require('jmespath');
+const verifiedid = require('./services/verified_id');
 
-const sql = require("mssql");
+
 
 // create another service file.
 const getRole = require("./services");
@@ -59,6 +63,35 @@ async function connectAndQuery(email) {
     console.error(err.message);
   }
   return rows;
+}
+
+
+exports.getHomePage = async (req, res, next) => {
+    let results;
+    results = await verifiedid.listCredType();
+
+    let list={ 
+        creds: results
+    }
+    
+    if (req.session?.idTokenClaims?.emails[0]) {
+      var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+      console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
+
+    res.render("home", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      queryRoles: queryRoles["recordset"][0]["roleName"],
+      list:list
+    });
+  } else {
+    res.render("home", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      queryRoles: "",
+      list:list
+    });
+  }
 }
 
 const fetchManager = require("./utils/fetchManager");
