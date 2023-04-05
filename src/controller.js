@@ -1,6 +1,10 @@
 /** @format */
 
-const sql = require("mssql");
+const axios = require('axios');
+const sql = require('mssql');
+const qs = require('qs');
+const jmespath = require('jmespath');
+const verifiedid = require('./services/verified_id');
 
 // create another service file.
 const getRole = require("./services");
@@ -81,6 +85,18 @@ const isConfigured = (req) => {
 };
 
 exports.getHomePage = async (req, res, next) => {
+
+  let results;
+  results = await verifiedid.listCredType();
+
+  let list={ 
+      creds: results
+  }
+
+
+
+
+
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
@@ -91,12 +107,14 @@ exports.getHomePage = async (req, res, next) => {
       isAuthenticated: req.session.isAuthenticated,
       configured: isConfigured(req),
       queryRoles: queryRoles["recordset"][0]["roleName"],
+      list:list
     });
   } else {
     res.render("home", {
       isAuthenticated: req.session.isAuthenticated,
       configured: isConfigured(req),
-      queryRoles: ""
+      queryRoles: "",
+      list:list
     });
   }
 };

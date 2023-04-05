@@ -28,6 +28,12 @@
                         <!-- else -->
                         <!-- diplay holder only -->
                         <% if (isAuthenticated) { %>
+                            <ul>
+                                <% list.creds.forEach((creds)=>{%>
+                                      <li><%=creds%></li> 
+                                <%});%>
+                            </ul>
+
                             <% if (queryRoles.toLowerCase() == "issuer") { %>
                                 <a class="btn btn-secondary" href="/issuer" role="button">Issuer</a>
                                 <% } if (queryRoles.toLowerCase() == "verifier") { %>
@@ -50,6 +56,18 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="row" style="margin:auto">
+            <div id="card-div" class="col-md-3">
+            
+                
+
+            </div>
+        </div>
+
+
+
 
         <div id="card-div" class="col-md-3">
             <div class="card text-center">
