@@ -5,7 +5,6 @@ const qs = require('qs');
 const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
 const getAttributes = require("./getattributes");
-const sql = require("mssql");
 
 // create another service file.
 const getRole = require("./services");
@@ -246,4 +245,4 @@ exports.getProfile = async (req, res, next) => {
     configured: isConfigured(req),
     userAttributes: userAttributes
   });
-  
+}
