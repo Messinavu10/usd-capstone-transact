@@ -18,7 +18,7 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/verifier', mainController.getVpage);
     router.get('/holder', mainController.getHolderpage);
     router.get('/existingcredtypes', mainController.getExistingCredTypes);
-
+    router.get('/profile', mainController.getProfile);
     //will add isauthenticated after testing
 
 

@@ -1,10 +1,10 @@
-/** @format */
-
 const axios = require('axios');
 const sql = require('mssql');
 const qs = require('qs');
 const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
+
+const getAttributes = require("./getattributes");
 
 // create another service file.
 const getRole = require("./services");
@@ -224,15 +224,39 @@ exports.getHolderpage = (req, res, next) => {
 };
 exports.getExistingCredTypes = (req, res, next) => {
   const claims = {
-    name: req.session.idTokenClaims.name,
-    preferred_username: req.session.idTokenClaims.preferred_username,
-    oid: req.session.idTokenClaims.oid,
-    sub: req.session.idTokenClaims.sub,
+      name: req.session.idTokenClaims.name,
+      preferred_username: req.session.idTokenClaims.preferred_username,
+      oid: req.session.idTokenClaims.oid,
+      sub: req.session.idTokenClaims.sub
   };
 
-  res.render("existingcredtypes", {
+  res.render('existingcredtypes', { 
     isAuthenticated: req.session.isAuthenticated,
-    claims: claims,
-    configured: isConfigured(req),
+    configured: isConfigured(req)
   });
-};
+}
+
+exports.getProfile = async (req, res, next) => {
+
+  const claims = {
+      name: req.session.idTokenClaims.name,
+      preferred_username: req.session.idTokenClaims.preferred_username,
+      oid: req.session.idTokenClaims.oid,
+      sub: req.session.idTokenClaims.sub
+  };
+
+  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
+
+  let userAttributes = {};
+  queryAttributes["recordset"].forEach( (element)  => {
+    userAttributes[element.attributeName] = element.attributeValue;
+  });
+
+  console.log(userAttributes);
+
+  res.render('profile', { 
+    isAuthenticated: req.session.isAuthenticated,
+    configured: isConfigured(req),
+    userAttributes: userAttributes
+  });
+}
