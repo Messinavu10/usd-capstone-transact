@@ -39,4 +39,7 @@ app.use(session({ secret: 'ENTER_YOUR_SECRET_HERE', resave: false, saveUninitial
 // set up routes with authentication
 app.use(getRoutes(mainController, authProvider, express.Router()));
 
+module.exports.app = app;
+
+
 app.listen(appSettings.host.port, () => console.log(`Msal Node Auth Code Sample app listening on port ${appSettings.host.port}!`));
