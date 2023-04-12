@@ -186,7 +186,7 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-exports.getVpage = (req, res, next) => {
+exports.getVerifierPage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,
     preferred_username: req.session.idTokenClaims.preferred_username,
