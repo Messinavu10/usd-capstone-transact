@@ -95,20 +95,16 @@ exports.getHomePage = async (req, res, next) => {
     queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
 
-    if (req.session?.idTokenClaims?.emails[0]) {    
-      credentialTypes = await verifiedid.listCredType();
-      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
-    } 
+    // if (req.session?.idTokenClaims?.emails[0]) {    
+    //   credentialTypes = await verifiedid.listCredType();
+    //   queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
+    // } 
   };
     res.render("home", {
       isAuthenticated: req.session.isAuthenticated,
       configured: isConfigured(req),
-<<<<<<< HEAD
-      queryRoles: "",
-=======
       roles: queryRoles,
       list: credentialTypes
->>>>>>> origin/ui-tabs
     });
 };
 
@@ -191,7 +187,7 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-exports.getVerifierPage = (req, res, next) => {
+exports.getVerifierPage = async(req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,
     preferred_username: req.session.idTokenClaims.preferred_username,
@@ -199,11 +195,30 @@ exports.getVerifierPage = (req, res, next) => {
     sub: req.session.idTokenClaims.sub,
   };
 
-  res.render("verifier", {
-    isAuthenticated: req.session.isAuthenticated,
-    claims: claims,
-    configured: isConfigured(req),
-  });
+  var queryRoles = [];
+  // an array of objects
+  //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
+  if (req.session?.idTokenClaims?.emails[0]) {
+    credentialTypes = await verifiedid.listCredType();
+    queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
+
+    
+  };
+
+  // run some code to get the roles
+
+
+    res.render("verifier", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: credentialTypes,
+      claims: claims,
+      credentialTypes: credentialTypes
+    });
+
+
 };
 exports.getHolderpage = (req, res, next) => {
   const claims = {
