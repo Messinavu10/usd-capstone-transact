@@ -411,28 +411,3 @@ async function getAdminAccessToken () {
       },
     },
   };
-  
-  // Create msal application object to be used for login and token cache
-  const msalCca = new msal.ConfidentialClientApplication (msalConfig);
-  
-  let authorityId = "";
-  let did = "";
-  
-  // Get the did
-  exports.getPresentation = async () => {
-    if (authorityId !== "") {
-      return;
-    }
-    let access_token = await getAdminAccessToken();
-    let getResponse = await axios({
-      method: "post",
-      // replace url with presentation request endpoint
-      url: "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest",
-      headers: {
-        Authorization: "Bearer " + access_token,
-        "Content-Type": "application/json",
-      },
-    });
-    authorityId = getResponse.data.value[0].id;
-    did = getResponse.data.value[0].didModel.did;
-  };
