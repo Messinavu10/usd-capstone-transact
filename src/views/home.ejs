@@ -14,7 +14,7 @@
 
 <body>
 
-    <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured, queryRoles}); %>
+    <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured, roles}); %>
     <% if (isAuthenticated) { %>
     <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-4 align-items-center justify-content-center">
         <div class="list-group">

@@ -5,6 +5,7 @@ const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
 
 const getAttributes = require("./getattributes");
+const data = require("./services/data");
 
 // create another service file.
 const getRole = require("./services");
@@ -85,33 +86,32 @@ const isConfigured = (req) => {
 };
 
 exports.getHomePage = async (req, res, next) => {
-
   let credentialTypes = [];
-
+  var queryRoles = [];
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
     credentialTypes = await verifiedid.listCredType();
-    var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
 
+    if (req.session?.idTokenClaims?.emails[0]) {    
+      credentialTypes = await verifiedid.listCredType();
+      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
+    } 
+  };
     res.render("home", {
       isAuthenticated: req.session.isAuthenticated,
       configured: isConfigured(req),
-      queryRoles: queryRoles["recordset"][0]["roleName"],
-      list:credentialTypes
+      roles: queryRoles,
+      list: credentialTypes
     });
-  } else {
-    res.render("home", {
-      isAuthenticated: req.session.isAuthenticated,
-      configured: isConfigured(req),
-      queryRoles: "",
-      list:credentialTypes
-    });
-  }
 };
 
-exports.getIssuerPage = (req, res, next) => {
+exports.getIssuerPage = async (req, res, next) => {
+  var queryRoles = [];
+  //if (req.session?.idTokenClaims?.emails[0]) { 
+  //var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
   connectAndQuery(req.session.idTokenClaims.emails[0]).then((attributes) => {
     const claims = {
       name: req.session.idTokenClaims.name,
@@ -129,6 +129,7 @@ exports.getIssuerPage = (req, res, next) => {
       configured: isConfigured(req),
     });
   });
+  //}//else (res.redirect("/home"));
 };
 exports.getManagePage = (req, res, next) => {
   const claims = {
