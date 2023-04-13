@@ -15,20 +15,11 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/create',  mainController.getCreatePage);
     router.get('/issuecreds', mainController.getIssueCredentialsPage); 
     router.get('/deletecreds', mainController.getDeleteCredentialsPage);
-
-    // route for verifier to detect if qr code is scanned
-    router.get('/verifier/callback', mainController.getCallbackpage);
-    // route for verifier to send request to holder
-    // router.get('/verifier/request', mainController.getRequestpage);
-    // route for verifier to get response from holder
-    router.get('/verifier/response', mainController.getResponsepage);
-
-
-    router.get('/verifier', mainController.getVpage);
-    
+    // router.get('/verifier/callback', mainController.getCallbackpage);
+    router.get('/verifier', mainController.getVerifierPage);
     router.get('/holder', mainController.getHolderpage);
     router.get('/existingcredtypes', mainController.getExistingCredTypes);
-
+    router.get('/profile', mainController.getProfile);
     //will add isauthenticated after testing
 
 
