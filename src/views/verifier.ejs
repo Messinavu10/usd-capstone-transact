@@ -53,10 +53,13 @@
       // for now use a dummy url for testing
       qrcode.makeCode("https://www.transactcampus.com");
       document.getElementById("qrcode");
-      
+
       document.getElementById("qrText").style.display = "none";
       document.getElementById("message").innerHTML = respMsg.message;
-      
+
+
+
+
       //   var respPresentationReq = null;
       //   signIn.addEventListener("click", () => {
       //     fetch("/api/verifier/presentation-request")
@@ -150,6 +153,7 @@
       //         });
       //     }, 1500); //change this to higher interval if you use ngrok to prevent overloading the free tier service
       //   });
+      
     </script>
   </body>
 </html>
