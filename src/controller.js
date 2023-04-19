@@ -191,12 +191,14 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
 };
 exports.getVerifierPage = async (req, res, next) => {
   const claims = {
-    name: req.session.idTokenClaims.name,
-    preferred_username: req.session.idTokenClaims.preferred_username,
-    oid: req.session.idTokenClaims.oid,
-    sub: req.session.idTokenClaims.sub,
+    name: req.session.idTokenClaims?.name,
+    preferred_username: req.session.idTokenClaims?.preferred_username,
+    oid: req.session.idTokenClaims?.oid,
+    sub: req.session.idTokenClaims?.sub,
   };
 
+
+  let credentialTypes = [];
   var queryRoles = [];
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
@@ -209,25 +211,37 @@ exports.getVerifierPage = async (req, res, next) => {
   // run some code to get the roles
   req.query["credtype"];
 
-  res.render("verifier", {
-    isAuthenticated: req.session.isAuthenticated,
-    configured: isConfigured(req),
-    roles: queryRoles,
-    list: credentialTypes,
-    claims: claims,
-    credentialTypes: credentialTypes,
-  });
+  if (credentialTypes && claims) {
+    res.render("verifier", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: credentialTypes,
+      claims: claims,
+      credentialTypes: credentialTypes,
+    });
+  } else {
+    res.render("verifier", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: [],
+      claims: {},
+      credentialTypes: credentialTypes,
+    });
+  }
 };
 
 exports.getVerifierPageQR = async (req, res, next) => {
-  // const claims = {
-  //   name: req.session.idTokenClaims.name,
-  //   preferred_username: req.session.idTokenClaims.preferred_username,
-  //   oid: req.session.idTokenClaims.oid,
-  //   sub: req.session.idTokenClaims.sub,
-  // };
+  const claims = {
+    name: req.session.idTokenClaims?.name,
+    preferred_username: req.session.idTokenClaims?.preferred_username,
+    oid: req.session.idTokenClaims?.oid,
+    sub: req.session.idTokenClaims?.sub,
+  };
 
   var queryRoles = [];
+  var credentialTypes = [];
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
@@ -237,8 +251,9 @@ exports.getVerifierPageQR = async (req, res, next) => {
   }
 
   // run some code to get the roles
-  req.query["credtype"];
+  // req.query["credtype"];
 
+  // res.render("verifierqr", {});
   res.render("verifierqr", {
     isAuthenticated: req.session.isAuthenticated,
     configured: isConfigured(req),
@@ -246,6 +261,7 @@ exports.getVerifierPageQR = async (req, res, next) => {
     list: credentialTypes,
     claims: claims,
     credentialTypes: credentialTypes,
+    query: req.query,
   });
 };
 exports.getHolderpage = (req, res, next) => {
