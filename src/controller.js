@@ -242,6 +242,7 @@ exports.getVerifierPageQR = async (req, res, next) => {
 
   var queryRoles = [];
   var credentialTypes = [];
+  var presentationRequest = [];
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
@@ -250,8 +251,7 @@ exports.getVerifierPageQR = async (req, res, next) => {
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
   }
 
-  // run some code to get the roles
-  // req.query["credtype"];
+  presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
 
   // res.render("verifierqr", {});
   res.render("verifierqr", {
@@ -262,6 +262,7 @@ exports.getVerifierPageQR = async (req, res, next) => {
     claims: claims,
     credentialTypes: credentialTypes,
     query: req.query,
+    presentationRequest: presentationRequest,
   });
 };
 exports.getHolderpage = (req, res, next) => {
