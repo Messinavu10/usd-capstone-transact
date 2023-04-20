@@ -1,8 +1,8 @@
-const axios = require('axios');
-const sql = require('mssql');
-const qs = require('qs');
-const jmespath = require('jmespath');
-const verifiedid = require('./services/verified_id');
+const axios = require("axios");
+const sql = require("mssql");
+const qs = require("qs");
+const jmespath = require("jmespath");
+const verifiedid = require("./services/verified_id");
 
 const getAttributes = require("./getattributes");
 const data = require("./services/data");
@@ -88,17 +88,25 @@ const isConfigured = (req) => {
 exports.getHomePage = async (req, res, next) => {
   let credentialTypes = [];
   var queryRoles = [];
-
-    if (req.session?.idTokenClaims?.emails[0]) {    
-      credentialTypes = await verifiedid.listCredType();
-      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
-    } 
-  
+  // an array of objects
+  //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
+  if (req.session?.idTokenClaims?.emails[0]) {
+    credentialTypes = await verifiedid.listCredType();
+    queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
+    console.log(queryRoles);
     res.render("home", {
       isAuthenticated: req.session.isAuthenticated,
       configured: isConfigured(req),
-      roles: queryRoles,
-      list: credentialTypes
+      roles: queryRoles["recordset"][0]["roleName"].toLowerCase(),
+      list: credentialTypes,
+    });
+  } else
+    res.render("home", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: "",
+      list: credentialTypes,
     });
 };
 
@@ -189,24 +197,78 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
 };
 exports.getVerifierPage = async (req, res, next) => {
   const claims = {
-    name: req.session.idTokenClaims.name,
-    preferred_username: req.session.idTokenClaims.preferred_username,
-    oid: req.session.idTokenClaims.oid,
-    sub: req.session.idTokenClaims.sub,
+    name: req.session.idTokenClaims?.name,
+    preferred_username: req.session.idTokenClaims?.preferred_username,
+    oid: req.session.idTokenClaims?.oid,
+    sub: req.session.idTokenClaims?.sub,
+  };
+
+
+  let credentialTypes = [];
+  var queryRoles = [];
+  // an array of objects
+  //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
+  if (req.session?.idTokenClaims?.emails[0]) {
+    credentialTypes = await verifiedid.listCredType();
+    queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
+  }
+
+  // run some code to get the roles
+  req.query["credtype"];
+
+  if (credentialTypes && claims) {
+    res.render("verifier", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: credentialTypes,
+      claims: claims,
+      credentialTypes: credentialTypes,
+    });
+  } else {
+    res.render("verifier", {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: [],
+      claims: {},
+      credentialTypes: credentialTypes,
+    });
+  }
+};
+
+exports.getVerifierPageQR = async (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims?.name,
+    preferred_username: req.session.idTokenClaims?.preferred_username,
+    oid: req.session.idTokenClaims?.oid,
+    sub: req.session.idTokenClaims?.sub,
   };
 
   var queryRoles = [];
+  var credentialTypes = [];
+  var presentationRequest = [];
+  // an array of objects
+  //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
+  if (req.session?.idTokenClaims?.emails[0]) {
+    credentialTypes = await verifiedid.listCredType();
+    queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
+    //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
+  }
 
-    if (req.session?.idTokenClaims?.emails[0]) {    
-      credentialTypes = await verifiedid.listCredType();
-      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
-    } 
+  presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
 
-  res.render("verifier", {
+  // res.render("verifierqr", {});
+  res.render("verifierqr", {
     isAuthenticated: req.session.isAuthenticated,
-    claims: claims,
     configured: isConfigured(req),
-    roles: queryRoles
+    roles: queryRoles,
+    list: credentialTypes,
+    claims: claims,
+    credentialTypes: credentialTypes,
+    query: req.query,
+    presentationRequest: presentationRequest,
   });
 };
 exports.getHolderpage = (req, res, next) => {
@@ -225,39 +287,40 @@ exports.getHolderpage = (req, res, next) => {
 };
 exports.getExistingCredTypes = (req, res, next) => {
   const claims = {
-      name: req.session.idTokenClaims.name,
-      preferred_username: req.session.idTokenClaims.preferred_username,
-      oid: req.session.idTokenClaims.oid,
-      sub: req.session.idTokenClaims.sub
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
   };
 
-  res.render('existingcredtypes', { 
+  res.render("existingcredtypes", {
     isAuthenticated: req.session.isAuthenticated,
-    configured: isConfigured(req)
+    configured: isConfigured(req),
   });
-}
+};
 
 exports.getProfile = async (req, res, next) => {
-
   const claims = {
-      name: req.session.idTokenClaims.name,
-      preferred_username: req.session.idTokenClaims.preferred_username,
-      oid: req.session.idTokenClaims.oid,
-      sub: req.session.idTokenClaims.sub
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
   };
 
-  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
+  var queryAttributes = await getAttributes(
+    req.session.idTokenClaims.emails[0]
+  );
 
   let userAttributes = {};
-  queryAttributes["recordset"].forEach( (element)  => {
+  queryAttributes["recordset"].forEach((element) => {
     userAttributes[element.attributeName] = element.attributeValue;
   });
 
   console.log(userAttributes);
 
-  res.render('profile', { 
+  res.render("profile", {
     isAuthenticated: req.session.isAuthenticated,
     configured: isConfigured(req),
-    userAttributes: userAttributes
+    userAttributes: userAttributes,
   });
-}
+};
