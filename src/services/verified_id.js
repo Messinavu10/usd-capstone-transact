@@ -225,7 +225,7 @@ getPresentationRequest = async (credTypeId, req) => {
   try {
     // ask: mrinal, getting a 401 unauthorized error here - why?
     getResponse = await axios({
-      method: "get",
+      method: "post",
       url: "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest",
       headers: {
         Authorization: "Bearer " + access_token,
