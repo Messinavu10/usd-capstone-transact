@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 const jmespath = require("jmespath");
-
+const appSettings = require('../../appSettings')();
 const msal = require("@azure/msal-node");
 
 let msalConfig = {
@@ -177,11 +177,10 @@ getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
 exports.getIssuanceRequest = getIssuanceRequest;
 
 getPresentationRequest = async (credTypeId, req) => {
-  let credType = "";
+
   let access_token = "";
 
   try {
-    credType = await getCredType(credTypeId);
     access_token = await getIssuanceAccessToken();
   } catch (error) {
     console.log(error);
@@ -194,24 +193,23 @@ getPresentationRequest = async (credTypeId, req) => {
   const payload = {
     includeQRCode: true,
     includeReceipt: true,
-    authority:
-      "did:ion:EiCLL8lzCqlGLYTGbjwgR6SN6OABCO6uUKyF5zM7fQZ8Jg:eyJ...<SNIP>...",
+    authority: did,  // defined above
     registration: {
-      clientName: "Veritable Credential Expert Verifier",
+      clientName: "Veritable Credential Expert Verifier",  // change to whatever, name of client
     },
-    callback: {
-      url: "https://www.contoso.com/api/verifier/presentationCallback",
-      state: "92d076dd-450a-4247-aa5b-d2e75a1a5d58",
+    callback: {   // callback url for web application, comes from .env file
+      url: appSettings.host.baseUri,  // from appSettings
+      state: sessionId, // line 192
       headers: {
         "api-key": "OPTIONAL API-KEY for CALLBACK EVENTS",
       },
     },
     requestedCredentials: [
       {
-        type: "VerifiedCredentialExpert",
-        purpose: "So we can see that you a veritable credentials expert",
+        type: credTypeId,
+        purpose: "So we can see that you a veritable credentials expert", // change to whatever, shows on screen
         acceptedIssuers: [
-          "did:ion:EiCLL8lzCqlGLYTGbjwgR6SN6OABCO6uUKyF5zM7fQZ8Jg:eyJ...<SNIP>...",
+          did, // same as 197
         ],
         configuration: {
           validation: {
@@ -242,12 +240,12 @@ getPresentationRequest = async (credTypeId, req) => {
   }
 
   // return getResponse.data ? getResponse.data : '';
-  return {
-    requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-    url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-    expiry: 1633017751,
-    qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
-  };
+  // return {
+  //   requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
+  //   url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
+  //   expiry: 1633017751,
+  //   qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
+  // };
 };
 
 exports.getPresentationRequest = getPresentationRequest;
