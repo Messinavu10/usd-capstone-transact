@@ -246,7 +246,6 @@ exports.getVerifierPageQR = async (req, res, next) => {
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
-    credentialTypes = await verifiedid.listCredType();
     queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
   }
