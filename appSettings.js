@@ -5,19 +5,22 @@ const appSettings = () => {
     
     let port, baseUri;
     
-    // local development only
     if (domainName === 'localhost') {
         port = process.env.PORT || 8080;
         baseUri = `http://${domainName}:${port}`;
         console.log(`local development only baseUri = ${baseUri}`)
+    } else if (domainName.startsWith('http') ) {
+        // deployed to NGROK
+        port = 8080;
+        baseUri = domainName;
+        console.log(`deploy to NGROK baseUri = ${baseUri}`)
+
     } else {
         // deployed to Azure
         port = 8080;
         baseUri = `https://${domainName}.azurewebsites.net`;
         console.log(`deploy to Azure baseUri = ${baseUri}`)
     }
-    
-    
     
     const app_settings_vals = {
         "host": {

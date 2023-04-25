@@ -11,9 +11,10 @@ const getRoutes = (mainController, authProvider, router)=>{
 
     // secure routes
     router.get('/issuer', mainController.getIssuerPage);
+    //router.get('/issuer/callback', mainController.getIssuerPage);
     router.get('/manage', mainController.getManagePage);
     router.get('/create',  mainController.getCreatePage);
-    router.get('/issuecreds', mainController.getIssueCredentialsPage); 
+    //router.get('/issuecreds', mainController.getIssueCredentialsPage); 
     router.get('/deletecreds', mainController.getDeleteCredentialsPage);
     // router.get('/verifier/callback', mainController.getCallbackpage);
     router.get('/verifier', mainController.getVerifierPage);

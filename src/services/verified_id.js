@@ -1,7 +1,7 @@
 const axios = require ('axios');
 const qs = require ('qs');
 const jmespath = require ('jmespath');
-
+const appSettings = require('../../appSettings')();
 const msal = require ('@azure/msal-node');
 
 let msalConfig = {
@@ -137,41 +137,48 @@ getCredType = async credTypeId => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
-  const credType = await getCredType (credTypeId);
+getIssuanceRequest = async (req, claims) => {
+  const pincode = Math.floor(1000 + Math.random() * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id;
   const payload = {
     includeQRCode: true,
     callback: {
-      url: `${baseUri}/issuanceCallback`,
+      url: appSettings.host.baseUri, //change to usetransactvc url? //appSettings.host.baseUri
       state: sessionId,
     },
     authority: did,
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: credType.name,
+    type: req.query.credType,
     manifest: credType.manifestUrl,
     claims: {
-      given_name: 'Megan',
-      family_name: 'Bowen',
+      given_name: claims.name
     },
     pin: {
-      value: '3539',
-      length: 4,
+      value:pincode.toString(),
+      length:4
     },
   };
-  let getResponse = await axios ({
+  console.log("calling axios");
+  let getResponse;
+  try{
+  getResponse = await axios ({
     method: 'post',
-    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/verifiableCredentials/createIssuanceRequest`,
+    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
     headers: {
       Authorization: 'Bearer ' + access_token,
       'Content-Type': 'application/json',
     },
-    data: payload,
+    data: payload
   });
-  return getResponse.data;
+  return [getResponse.data,pincode];
+} catch (error) {
+  console.log(error);
+}
 };
 
 exports.getIssuanceRequest = getIssuanceRequest;

@@ -86,7 +86,8 @@ const isConfigured = (req) => {
 };
 
 exports.getHomePage = async (req, res, next) => {
-  let credentialTypes = [];
+  let credentialTypes = 
+  [];
   var queryRoles = [];
 
     if (req.session?.idTokenClaims?.emails[0]) {    
@@ -105,31 +106,34 @@ exports.getHomePage = async (req, res, next) => {
 exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
 
-    if (req.session?.idTokenClaims?.emails[0]) {    
-      credentialTypes = await verifiedid.listCredType();
-      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
-    } 
-  //if (req.session?.idTokenClaims?.emails[0]) { 
-  //var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
-  connectAndQuery(req.session.idTokenClaims.emails[0]).then((attributes) => {
-    const claims = {
-      name: req.session.idTokenClaims.name,
-      authEmail: req.session.idTokenClaims.emails[0],
-      preferred_username: req.session.idTokenClaims.preferred_username,
-      oid: req.session.idTokenClaims.oid,
-      sub: req.session.idTokenClaims.sub,
-      userName: attributes[0].userName,
-      userEmail: attributes[0].userEmail,
-      attributes: attributes,
-    };
-    res.render("issuer", {
-      isAuthenticated: req.session.isAuthenticated,
-      claims: claims,
-      configured: isConfigured(req),
-      roles: queryRoles
-    });
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+  //console.log(claims.name);
+
+  if (req.session?.idTokenClaims?.emails[0]) {    
+    credentialTypes = await verifiedid.listCredType();
+    queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
+  }
+
+  let apioutput = await verifiedid.getIssuanceRequest(req, claims);
+  const qrcode = apioutput[0];
+  const pin = apioutput[1];
+  //qrcodeoutput = await verifiedid.getIssuanceRequest(req, claims);
+  //console.log(qrcode);
+  //console.log(pin);
+  
+  res.render("issuer", {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+    roles: queryRoles,
+    qrlink: qrcode,
+    qrpin:pin
   });
-  //}//else (res.redirect("/home"));
 };
 exports.getManagePage = (req, res, next) => {
   const claims = {
@@ -159,20 +163,20 @@ exports.getCreatePage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-exports.getIssueCredentialsPage = (req, res, next) => {
-  const claims = {
-    name: req.session.idTokenClaims.name,
-    preferred_username: req.session.idTokenClaims.preferred_username,
-    oid: req.session.idTokenClaims.oid,
-    sub: req.session.idTokenClaims.sub,
-  };
+// exports.getIssueCredentialsPage = (req, res, next) => {
+//   const claims = {
+//     name: req.session.idTokenClaims.name,
+//     preferred_username: req.session.idTokenClaims.preferred_username,
+//     oid: req.session.idTokenClaims.oid,
+//     sub: req.session.idTokenClaims.sub,
+//   };
 
-  res.render("issuecreds", {
-    isAuthenticated: req.session.isAuthenticated,
-    claims: claims,
-    configured: isConfigured(req),
-  });
-};
+//   res.render("issuecreds", {
+//     isAuthenticated: req.session.isAuthenticated,
+//     claims: claims,
+//     configured: isConfigured(req),
+//   });
+// };
 exports.getDeleteCredentialsPage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,

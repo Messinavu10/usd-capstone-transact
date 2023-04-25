@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -13,62 +13,22 @@
 
 <body>
 
-    <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured}); %>
-         <div id="card-div" class="col-md-3">
-            Placeholder for where user info goes
-         </div>
+    <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured,roles}); %>
         <div id="card-div" class="col-md-3">
             <div class="card text-center">
                 <div class="card-body">
                     <div class="center">
-                        <h1>Information About User(W.I.P.)</h1>
+                        <div class="card-body">
+                            <div id="qrcode" style="text-align: center"></div>
+                            <div id="pinCodeText" style="text-align: center"></div> 
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row" style="margin:auto">
-            <div id="card-div" class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <a class="btn btn-primary" href="/manage" role= "button">Manage Credential Type</a>
-                        <a class="btn btn-primary" href="/create" role="button">Create Credential Type</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="table-area-div">
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Claim</th>
-                        <th scope="col">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for (const [key, value] of Object.entries(claims)) { %>
-                        <% if (key === 'attributes') { %>
-                            <tr>
-                                <td><%= key %></td>
-                                <td>
-                                    <% for (const [key1, value1] of Object.entries(claims.attributes)) { %>
-                                        <p><%= value1.attributeName %>: <%= value1.attributeValue %></p>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% } else { %>
-                        <tr>
-                            <td><%= key %></td>
-                            <td><%= value %></td>
-                        </tr>
-                        <% } %>
-                    <% } %>
-                </tbody>
-            </table>
-        </div> 
-
+    
         <%- include('includes/footer'); %>
-
+            
             <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
                 integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
                 crossorigin="anonymous"></script>
@@ -78,6 +38,161 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
                 integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
                 crossorigin="anonymous"></script>
+            <script src="qrcode.min.js"></script>
+            <script>
+                var qrcode = new QRCode("qrcode", { width: 300, height: 300 }); //qr code for link from API call
+                qrcode.makeCode('<% __append(qrlink.url) %>');
+                document.getElementById('pinCodeText').innerHTML = "Pin: " + '<% __append(qrpin)%>';
+            </script>
 </body>
 
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" status="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="/style.css">
+        <title>issuer</title>
+    </head>
+        
+    <body>
+
+        <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured,roles}); %>
+
+        <div id="wrap">
+        
+            <div id="qrText"  style="display:none;">
+                <p class="small-text">
+                    <img src="authenticator-icon.png" alt="Authenticator icon" class="icon-small"><br>
+                    Scan with Microsoft Authenticator or Custom Wallet
+                </p>
+            </div>
+            <a id="deeplink" style="display: none;margin-top: 10px;">Tap to open Authenticator on mobile</a>
+            <div id="qrcode" style="text-align: center"></div>
+            <div id="pinCodeText" style="display: none"></div>
+
+            <div id="message-wrapper" class="margin-bottom-75 margin-top-75" style="display: none">
+               <i class="fas fa-user-check green icon-text-large margin-bottom-25"></i>
+               <div id="message"></div>
+               <br />
+               <div id="payload"></div>
+            </div>
+
+            <script>
+                var display = document.getElementById('display');
+                var qrcode = new QRCode("qrcode", { width: 200, height: 200 });
+                var respIssuanceReq = '<% __append(qrlink) %>';
+                
+                fetch('api/issuer/issuance-request')
+                .then(function(response) {
+                    response.text()
+                    .catch(error => displayMessage(error) )
+                    .then(function(message) {
+                        respIssuanceReq = JSON.parse(message);
+                        if( /Android/i.test(navigator.userAgent) ) {
+                            console.log(`Android device! Using deep link (${respIssuanceReq.url}).`);
+                            window.location.href = respIssuanceReq.url; setTimeout(function () {
+                            window.location.href = "https://play.google.com/store/apps/details?id=com.azure.authenticator"; }, 2000);
+                        } else if (/iPhone/i.test(navigator.userAgent)) {
+                            console.log(`iOS device! Using deep link (${respIssuanceReq.url}).`);
+                            window.location.replace(respIssuanceReq.url);
+                        } else {
+                            if ( response.status > 299 ) {
+                                displayMessage( message );
+                            } else {
+                                console.log(`Not Android or IOS. Generating QR code encoded with ${message}`);
+                                qrcode.makeCode(respIssuanceReq.url);
+                                document.getElementById('qrText').style.display = "block";
+                                if ('<% __append(qrpin)%>') {
+                                    document.getElementById('pinCodeText').innerHTML = "Pin code: " + '<% __append(qrpin)%>';
+                                    document.getElementById('pinCodeText').style.display = "block";
+                                }
+                                checkIssuanceResponse();
+                            }
+                        }
+                    }).catch(error => { console.log(error.message); })
+                }).catch(error => { console.log(error.message); })
+
+                function displayMessage(msg) {
+                    document.getElementById('message-wrapper').style.display = "block";
+                    document.getElementById("message").innerHTML = msg;
+                }
+
+                function checkIssuanceResponse() {
+                    var checkStatus = setInterval(function () {
+                        fetch('api/issuer/issuance-response?id=' + respIssuanceReq.id )
+                            .then(response => response.text())
+                            .catch(error => displayMessage( error ))
+                            .then(response => {
+                                if (response.length > 0) {
+                                    console.log(response)
+                                    respMsg = JSON.parse(response);
+                                    // QR Code scanned, show pincode if pincode is required
+                                    if (respMsg.status == 'request_retrieved') {
+                                        document.getElementById("qrcode").getElementsByTagName("img")[0].style.opacity = "0.1";
+                                        document.getElementById('qrText').style.display = "none";
+                                        if (respMsg.pin) {
+                                            document.getElementById('pinCodeText').style.display = "visible";
+                                        }
+                                        displayMessage( respMsg.message );
+                                    }
+                                    if (respMsg.status == 'issuance_successful') {
+                                        document.getElementById('qrcode').style.display = "none";
+                                        document.getElementById('pinCodeText').style.display = "none";
+                                        document.getElementById('message').innerHTML = respMsg.message;
+                                        clearInterval(checkStatus);
+                                    }
+                                    if (respMsg.status == 'issuance_error') {
+                                        document.getElementById('qrcode').style.display = "none";
+                                        document.getElementById('pinCodeText').style.display = "none";
+                                        document.getElementById('message').innerHTML = "Issuance error occurred, did you enter the wrong pincode? Please refresh the page and try again.";
+                                        document.getElementById('payload').innerHTML = "Payload: " + respMsg.payload;
+                                        clearInterval(checkStatus);
+                                    }
+                                }
+                            })
+                    }, 2500);
+                }
+
+                fetch('api/issuer/get-manifest')
+                .then(function(response) {
+                    response.text()
+                    .catch(error => displayMessage(error) )
+                    .then(function(message) {
+                        var manifest = JSON.parse(message);
+                        document.getElementById('idTitle').innerHTML = "Issuance of " + manifest.display.card.title + " by " + manifest.display.card.issuedBy;
+                        document.getElementById('idSubTitle').innerHTML = manifest.display.card.description;
+                        document.getElementById('logo').src = manifest.display.card.logo.uri;
+                    }).catch(error => { console.log(error.message); })
+                }).catch(error => { console.log(error.message); })
+
+                function parseParms(str) {
+                    var pieces = str.split("&"), data = {}, i, parts;
+                    for (i = 0; i < pieces.length; i++) {
+                        parts = pieces[i].split("=");
+                        if (parts.length < 2) {
+                            parts.push("");
+                        }
+                        data[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+                    }
+                    return data;
+                }
+                
+                window.onload = function() {
+                    var autoclick = parseParms(document.location.search.substring(1)).autoclick;
+                    if ( autoclick ) {
+                        document.getElementById('sign-in').click();
+                    } 
+                }
+
+            </script>
+            </div>
+            </div>
+    </body>
 </html>
