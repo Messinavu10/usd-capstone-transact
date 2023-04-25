@@ -138,7 +138,7 @@ getCredType = async (credTypeId) => {
 };
 
 getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
-  const credType = await getCredType(credTypeId);
+  // const credType = await getCredType(credTypeId);
   const access_token = await getIssuanceAccessToken();
   const sessionId = req.session.id;
   const payload = {
@@ -151,7 +151,7 @@ getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: credType.name,
+    type: credTypeId,
     manifest: credType.manifestUrl,
     claims: {
       given_name: "Megan",
@@ -233,12 +233,12 @@ getPresentationRequest = async (credTypeId, req) => {
       },
       data: payload,
     });
-
-    console.log(getResponse.data);
+    console.log("getResponse: ", getResponse);
+    
   } catch (error) {
     console.log(error);
   }
-
+return getResponse.data;
   // return getResponse.data ? getResponse.data : '';
   // return {
   //   requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",

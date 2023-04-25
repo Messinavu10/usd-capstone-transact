@@ -20,7 +20,6 @@
       configured, list, query, presentationRequest}); %> <%- include('includes/footer'); %>
       
       <h1>Hello world</h1>
-    <% console.log(presentationRequest.url) %>
 
     <div id="qrcode" style="text-align: center"></div>
 
@@ -42,7 +41,7 @@
       //   var display = document.getElementById("display");
       var qrcode = new QRCode("qrcode", { width: 300, height: 300 });
       // for now use a dummy url for testing
-      qrcode.makeCode("<%= presentationRequest.url %>");
+      qrcode.makeCode("<%=presentationRequest.url %>");
 
     </script> 
 

@@ -251,7 +251,7 @@ exports.getVerifierPageQR = async (req, res, next) => {
   }
 
   presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
-
+  console.log("presentationRequest url: ", presentationRequest.url);
   // res.render("verifierqr", {});
   res.render("verifierqr", {
     isAuthenticated: req.session.isAuthenticated,
