@@ -105,6 +105,7 @@ exports.getHomePage = async (req, res, next) => {
 
 exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
+  let credentialTypes = [];
 
   const claims = {
     name: req.session.idTokenClaims.name,
@@ -116,6 +117,7 @@ exports.getIssuerPage = async (req, res, next) => {
 
   if (req.session?.idTokenClaims?.emails[0]) {    
     credentialTypes = await verifiedid.listCredType();
+    //console.log(credentialTypes);
     queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
   }
 
@@ -132,7 +134,8 @@ exports.getIssuerPage = async (req, res, next) => {
     configured: isConfigured(req),
     roles: queryRoles,
     qrlink: qrcode,
-    qrpin:pin
+    qrpin:pin,
+    creds: credentialTypes
   });
 };
 exports.getManagePage = (req, res, next) => {

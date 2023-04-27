@@ -90,16 +90,16 @@
                 height: 300
             });
             // Create the qr code from the passed variables
-            qrcode.makeCode('<% __append(qrlink.url)%>');
+            //qrcode.makeCode('<% __append(qrlink.url)%>');     //we know this works
             document.getElementById('qrText').style.display = "block";
             if ('<% __append(qrpin)%>') {
-                document.getElementById('pinCodeText').innerHTML = "Pin code: " + '<% __append(qrpin)%>';
+                document.getElementById('pinCodeText').innerHTML = "Pin code: " + '<% __append(qrpin)%>'; //this makes the qr code
                 document.getElementById('pinCodeText').style.display = "block";
             }
 
             var respIssuanceReq = '<% __append(qrlink) %>';
 
-            fetch('api/issuer/issuance-request')
+            fetch('<% __append(qrlink) %>')   //is this right??
                 .then(function (response) {
                     response.text()
                         .catch(error => displayMessage(error))
@@ -145,7 +145,7 @@
 
             function checkIssuanceResponse() {
                 var checkStatus = setInterval(function () {
-                    fetch('api/issuer/issuance-response?id=' + respIssuanceReq.id)
+                    fetch('issuer?credType=' + respIssuanceReq.id)    //we know this is right from the sample code
                         .then(response => response.text())
                         .catch(error => displayMessage(error))
                         .then(response => {
