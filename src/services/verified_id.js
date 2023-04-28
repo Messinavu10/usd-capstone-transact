@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 const jmespath = require("jmespath");
-const appSettings = require('../../appSettings')();
+const appSettings = require("../../appSettings")();
 const msal = require("@azure/msal-node");
 
 let msalConfig = {
@@ -177,7 +177,6 @@ getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
 exports.getIssuanceRequest = getIssuanceRequest;
 
 getPresentationRequest = async (credTypeId, req) => {
-
   let access_token = "";
 
   try {
@@ -193,12 +192,13 @@ getPresentationRequest = async (credTypeId, req) => {
   const payload = {
     includeQRCode: true,
     includeReceipt: true,
-    authority: did,  // defined above
+    authority: did, // defined above
     registration: {
-      clientName: "Veritable Credential Expert Verifier",  // change to whatever, name of client
+      clientName: "Veritable Credential Expert Verifier", // change to whatever, name of client
     },
-    callback: {   // callback url for web application, comes from .env file
-      url: appSettings.host.baseUri,  // from appSettings
+    callback: {
+      // callback url for web application, comes from .env file
+      url: appSettings.host.baseUri, // from appSettings
       state: sessionId, // line 192
       headers: {
         "api-key": "OPTIONAL API-KEY for CALLBACK EVENTS",
@@ -223,6 +223,8 @@ getPresentationRequest = async (credTypeId, req) => {
 
   let getResponse = "";
   try {
+    
+    console.log("payload: ", payload);
     // ask: mrinal, getting a 401 unauthorized error here - why?
     getResponse = await axios({
       method: "post",
@@ -233,19 +235,19 @@ getPresentationRequest = async (credTypeId, req) => {
       },
       data: payload,
     });
-    console.log("getResponse: ", getResponse);
-    
   } catch (error) {
     console.log(error);
   }
-return getResponse.data;
+  console.log("getResponse: ", getResponse);
+  console.log("getResponse.data: ", getResponse.data);
+  // return getResponse.data;
   // return getResponse.data ? getResponse.data : '';
-  // return {
-  //   requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-  //   url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-  //   expiry: 1633017751,
-  //   qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
-  // };
+  return {
+    requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
+    url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
+    expiry: 1633017751,
+    qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
+  };
 };
 
 exports.getPresentationRequest = getPresentationRequest;

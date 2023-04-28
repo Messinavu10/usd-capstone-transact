@@ -10,6 +10,7 @@ const data = require("./services/data");
 // create another service file.
 const getRole = require("./services");
 
+
 const config = {
   user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
   password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
@@ -232,6 +233,9 @@ exports.getVerifierPage = async (req, res, next) => {
   }
 };
 
+
+
+
 exports.getVerifierPageQR = async (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims?.name,
@@ -250,9 +254,17 @@ exports.getVerifierPageQR = async (req, res, next) => {
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
   }
 
-  presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
-  console.log("presentationRequest url: ", presentationRequest.url);
+  try{
+    
+    presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
+    console.log("presentationRequest: ", presentationRequest);
+  }
+  catch (err){
+    console.log("presentationRequest error: ", err);
+
+  }
   // res.render("verifierqr", {});
+
   res.render("verifierqr", {
     isAuthenticated: req.session.isAuthenticated,
     configured: isConfigured(req),
@@ -263,6 +275,9 @@ exports.getVerifierPageQR = async (req, res, next) => {
     query: req.query,
     presentationRequest: presentationRequest,
   });
+
+
+
 };
 exports.getHolderpage = (req, res, next) => {
   const claims = {
