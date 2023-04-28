@@ -73,6 +73,8 @@
                 Scan with Microsoft Authenticator or Custom Wallet
             </p>
         </div>
+
+        <!-- The display of the QR code and pin -->
         <div id="qrcode" style="text-align: center; display:block"></div>
         <div id="pinCodeText" style="display: none"></div>
         <div><%= qrlink.url %></div>
@@ -82,6 +84,7 @@
             <br />
             <div id="payload"></div>
         </div>
+        <!-- -->
 
         <script>
             var display = document.getElementById('display');
@@ -93,13 +96,23 @@
             //qrcode.makeCode('<% __append(qrlink.url)%>');     //we know this works
             document.getElementById('qrText').style.display = "block";
             if ('<% __append(qrpin)%>') {
-                document.getElementById('pinCodeText').innerHTML = "Pin code: " + '<% __append(qrpin)%>'; //this makes the qr code
+                document.getElementById('pinCodeText').innerHTML = "Pin code: " +
+                '<% __append(qrpin)%>'; //this makes the qr code
                 document.getElementById('pinCodeText').style.display = "block";
             }
 
             var respIssuanceReq = '<% __append(qrlink) %>';
 
-            fetch('<% __append(qrlink) %>')   //is this right??
+            // Ajay,Naveen: 
+            /** 
+             * The QR code is already displayed on the screen
+             * You have to wait for the user to scan the QR code
+             * You will know the QR code has been scanned when the callback URL is called with 
+             * the status request_retrieved, issuance_successful or issuance_error
+             * 
+             */
+            fetch(
+                '<% __append(qrlink) %>') //is this right?? MV- NO, this is the wrong URL, you need to be fetching the callback URL
                 .then(function (response) {
                     response.text()
                         .catch(error => displayMessage(error))
@@ -145,7 +158,7 @@
 
             function checkIssuanceResponse() {
                 var checkStatus = setInterval(function () {
-                    fetch('issuer?credType=' + respIssuanceReq.id)    //we know this is right from the sample code
+                    fetch('issuer?credType=' + respIssuanceReq.id) //we know this is right from the sample code
                         .then(response => response.text())
                         .catch(error => displayMessage(error))
                         .then(response => {
