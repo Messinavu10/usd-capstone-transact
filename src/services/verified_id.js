@@ -1,7 +1,7 @@
 const axios = require ('axios');
 const qs = require ('qs');
 const jmespath = require ('jmespath');
-const appSettings = require('../../appSettings')();
+const appSettings = require ('../../appSettings') ();
 const msal = require ('@azure/msal-node');
 
 let msalConfig = {
@@ -138,7 +138,7 @@ getCredType = async credTypeId => {
 };
 
 getIssuanceRequest = async (req, claims) => {
-  const pincode = Math.floor(1000 + Math.random() * 9000);
+  const pincode = Math.floor (1000 + Math.random () * 9000);
   //console.log(pincode);
   const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
@@ -146,7 +146,7 @@ getIssuanceRequest = async (req, claims) => {
   const payload = {
     includeQRCode: true,
     callback: {
-      url: appSettings.host.baseUri, //change to usetransactvc url? //appSettings.host.baseUri
+      url: `${appSettings.host.baseUri}/issuer/callback`, //this is the full callback URI which is where the success response is returned to
       state: sessionId,
     },
     authority: did,
@@ -156,29 +156,29 @@ getIssuanceRequest = async (req, claims) => {
     type: req.query.credType,
     manifest: credType.manifestUrl,
     claims: {
-      given_name: claims.name
+      given_name: claims.name,
     },
     pin: {
-      value:pincode.toString(),
-      length:4
+      value: pincode.toString (),
+      length: 4,
     },
   };
-  console.log("calling axios");
+  console.log ('calling axios');
   let getResponse;
-  try{
-  getResponse = await axios ({
-    method: 'post',
-    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
-    headers: {
-      Authorization: 'Bearer ' + access_token,
-      'Content-Type': 'application/json',
-    },
-    data: payload
-  });
-  return [getResponse.data,pincode];
-} catch (error) {
-  console.log(error);
-}
+  try {
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+      },
+      data: payload,
+    });
+    return [getResponse.data, pincode];
+  } catch (error) {
+    console.log (error);
+  }
 };
 
 exports.getIssuanceRequest = getIssuanceRequest;
