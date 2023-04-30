@@ -283,7 +283,7 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-exports.getVerifierPage = async (req, res, next) => {
+exports.getVerifierListPage = async (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,
     preferred_username: req.session.idTokenClaims.preferred_username,
@@ -298,11 +298,12 @@ exports.getVerifierPage = async (req, res, next) => {
     queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
   }
 
-  res.render('verifier', {
+  res.render('verifierlist', {
     isAuthenticated: req.session.isAuthenticated,
     claims: claims,
     configured: isConfigured(req),
     roles: queryRoles,
+    list: credentialTypes,
   });
 };
 exports.getHolderpage = (req, res, next) => {
