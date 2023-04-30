@@ -45,8 +45,8 @@ const sessionStore = mainController.sessionStore;
 app.use (
   session ({
     secret: 'cookie-secret-key',
-    resave: true,
-    saveUninitialized: false,
+    resave: false,
+    saveUninitialized: true,
     store: sessionStore,
   })
 );
