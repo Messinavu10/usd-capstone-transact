@@ -279,11 +279,73 @@ exports.getVerifierPageQR = async (req, res, next) => {
     credentialTypes: credentialTypes,
     query: req.query,
     presentationRequest: presentationRequest,
+    sessionId: req.session.id,
   });
 
 
 
 };
+
+exports.postVerifierQRCallback = async (req, res, next) => {
+  // Collect the payload that was posted
+  var body = '';
+  req.on('data', function (data) {
+    body += data;
+  });
+
+  req.on('end', function () {
+    console.log(body);
+    // Ignoring api-key for now
+    // if ( req.headers['api-key'] != apiKey ) {
+    //   res.status(401).json({
+    //     'error': 'api-key wrong or missing'
+    //     });
+    //   return;
+    // }
+    var presentationResponse = JSON.parse(body.toString());
+    var message = null;
+    // there are 2 different callbacks. 1 if the QR code is scanned (or deeplink has been followed)
+    // Scanning the QR code makes Authenticator download the specific request from the server
+    // the request will be deleted from the server immediately.
+    // That's why it is so important to capture this callback and relay this to the UI so the UI can hide
+    // the QR code to prevent the user from scanning it twice (resulting in an error since the request is already deleted)
+    if (presentationResponse.requestStatus == 'request_retrieved') {
+      message = 'QR Code is scanned. Waiting for validation...';
+      serverSideSession.get(presentationResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: presentationResponse.requestStatus,
+          message: message,
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(presentationResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+    // the 2nd callback is the result with the verified credential being verified.
+    // typically here is where the business logic is written to determine what to do with the result
+    // the response in this callback contains the claims from the Verifiable Credential(s) being presented by the user
+    // In this case the result is put in the in memory cache which is used by the UI when polling for the state so the UI can be updated.
+    if (presentationResponse.requestStatus == 'presentation_verified') {
+      message = "Presentation received";
+      serverSideSession.get(presentationResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: presentationResponse.requestStatus,
+          message: message,
+          payload : presentationResponse.verifiedCredentialsData,
+          subject: presentationResponse.subject,
+          presentationResponse: presentationResponse
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(presentationResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+  });
+};
+
 exports.getHolderpage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,

@@ -51,6 +51,14 @@
       <a class="btn btn-primary mt-2" href="/verifier">Go Back</a>
     </div>
 
+    <div id="message-wrapper" style="text-align: center; display: none">
+      <div id="message"></div>
+      <br />
+      <div id="subject"></div>
+      <br />
+      <div id="payload"></div>
+    </div>
+
     <!-- importing bootstrap.js and supporting js libraries -->
     <script
       src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -75,6 +83,53 @@
       var qrcode = new QRCode("qrcode", { width: 300, height: 300 });
       // for now use a dummy url for testing
       qrcode.makeCode("<% __append(presentationRequest.url)%>");
+
+      checkIssuanceResponse();
+
+      function displayMessage(msg) {
+        document.getElementById("message-wrapper").style.display = "block";
+        document.getElementById("message").innerHTML = msg;
+      }
+
+      function checkIssuanceResponse() {
+        var checkStatus = setInterval(function () {
+          fetch("verifier-response?id=<% __append(sessionId)%>") // This should be the session id
+            .then((response) => response.text())
+            .catch((error) => displayMessage(error))
+            .then((response) => {
+              if (response.length > 0) {
+                console.log(response);
+                respMsg = JSON.parse(response);
+                // QR Code scanned, make it less visible
+                if (respMsg.status == "request_retrieved") {
+                  document
+                    .getElementById("qrcode")
+                    .getElementsByTagName("img")[0].style.opacity = "0.1";
+                  document.getElementById("qrText").style.display = "none";
+                  displayMessage(respMsg.message);
+                }
+                if (respMsg.status == "presentation_verified") {
+                  document.getElementById("qrcode").style.display = "none";
+                  document.getElementById("message").innerHTML =
+                    respMsg.message;
+                  document.getElementById("payload").innerHTML =
+                    "Payload: " + JSON.stringify(respMsg.payload[0].claims);
+                  document.getElementById("subject").innerHTML =
+                    "Please Verify";
+                  clearInterval(checkStatus);
+                }
+                if (respMsg.status == "issuance_failed") {
+                  document.getElementById("qrcode").style.display = "none";
+                  document.getElementById("message").innerHTML =
+                    "Presentation error occurred";
+                  document.getElementById("payload").innerHTML =
+                    "Payload: " + respMsg.payload;
+                  clearInterval(checkStatus);
+                }
+              }
+            });
+        }, 5500);
+      }
     </script>
   </body>
 </html>

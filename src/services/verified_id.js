@@ -198,10 +198,27 @@ getPresentationRequest = async (credTypeId, req) => {
     },
     callback: {
       // callback url for web application, comes from .env file
-      url: appSettings.host.baseUri, // from appSettings
+      url: appSettings.host.baseUri + "/verifiercallback", // from appSettings
       state: sessionId, // line 192
       headers: {
         "api-key": "OPTIONAL API-KEY for CALLBACK EVENTS",
+      },
+
+      includeQRCode: true,
+      callback: {
+        url: `${appSettings.host.baseUri}/issuer/callback`, //this is the full callback URI which is where the success response is returned to
+        state: sessionId,
+      },
+      authority: did,
+      registration: {
+        clientName: credType.displays[0].card.issuedBy,
+      },
+      type: credType.rules.vc.type[0],
+      manifest: credType.manifestUrl,
+      claims: userAttributes,
+      pin: {
+        value: pincode.toString(),
+        length: 4,
       },
     },
     requestedCredentials: [
@@ -223,7 +240,6 @@ getPresentationRequest = async (credTypeId, req) => {
 
   let getResponse = "";
   try {
-    
     console.log("payload: ", payload);
     // ask: mrinal, getting a 401 unauthorized error here - why?
     getResponse = await axios({
