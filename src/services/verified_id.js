@@ -142,28 +142,35 @@ getIssuanceRequest = async (req, claims) => {
   //console.log(pincode);
   const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
-  const sessionId = req.session.id;
+  const sessionId = req.session.id
+  
+  const userAttributes = {  //fake data //need to make database calls for this
+    given_name: 'John',
+    family_name: 'Doe',
+    gpa: '3.7',
+    department: 'Computer Science',
+    major: 'Computational Linguistics',
+  };
+
   const payload = {
     includeQRCode: true,
     callback: {
-      url: appSettings.host.baseUri, //change to usetransactvc url? //appSettings.host.baseUri
+      url: `${appSettings.host.baseUri}/issuer/callback`, //change to usetransactvc url? //appSettings.host.baseUri
       state: sessionId,
     },
     authority: did,
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: req.query.credType,
+    type: credType.rules.vc.type[0],
     manifest: credType.manifestUrl,
-    claims: {
-      given_name: claims.name
-    },
+    claims: userAttributes,
     pin: {
       value:pincode.toString(),
       length:4
     },
   };
-  console.log("calling axios");
+  console.log('calling axios');
   let getResponse;
   try{
   getResponse = await axios ({
@@ -180,5 +187,4 @@ getIssuanceRequest = async (req, claims) => {
   console.log(error);
 }
 };
-
 exports.getIssuanceRequest = getIssuanceRequest;

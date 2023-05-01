@@ -10,6 +10,8 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/redirect', authProvider.handleRedirect);
 
     // secure routes
+    router.post ('/issuer/callback', mainController.postIssuerCallback);
+    router.get ('/issuance-response', mainController.getIssuanceResponse);
     router.get('/issuer', mainController.getIssuerPage);
     //router.get('/issuer/callback', mainController.getIssuerPage);
     router.get('/manage', mainController.getManagePage);

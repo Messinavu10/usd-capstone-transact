@@ -1,11 +1,12 @@
 const axios = require('axios');
 const sql = require('mssql');
 const qs = require('qs');
-const jmespath = require('jmespath');
 const verifiedid = require('./services/verified_id');
-
+const {getSessionStore} = require ('./utils/session');
 const getAttributes = require("./getattributes");
 const data = require("./services/data");
+const serverSideSession = getSessionStore ();
+module.exports.sessionStore = serverSideSession;
 
 // create another service file.
 const getRole = require("./services");
@@ -105,7 +106,8 @@ exports.getHomePage = async (req, res, next) => {
 
 exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
-  let credentialTypes = [];
+  //let credentialTypes = [];
+  let sessionId = req.session.id;
 
   const claims = {
     name: req.session.idTokenClaims.name,
@@ -116,7 +118,7 @@ exports.getIssuerPage = async (req, res, next) => {
   //console.log(claims.name);
 
   if (req.session?.idTokenClaims?.emails[0]) {    
-    credentialTypes = await verifiedid.listCredType();
+    //credentialTypes = await verifiedid.listCredType();
     //console.log(credentialTypes);
     queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
   }
@@ -124,9 +126,19 @@ exports.getIssuerPage = async (req, res, next) => {
   let apioutput = await verifiedid.getIssuanceRequest(req, claims);
   const qrcode = apioutput[0];
   const pin = apioutput[1];
-  //qrcodeoutput = await verifiedid.getIssuanceRequest(req, claims);
   //console.log(qrcode);
   //console.log(pin);
+
+  serverSideSession.get( sessionId, (error, sessionVal) => {
+    var sessionData = {
+      "status" : 0,
+      "message": "Waiting for QR code to be scanned"
+    };
+    if ( sessionVal ) {
+      sessionVal.sessionData = sessionData;
+      serverSideSession.set( sessionId, sessionVal);  
+    }
+  });
   
   res.render("issuer", {
     isAuthenticated: req.session.isAuthenticated,
@@ -135,9 +147,91 @@ exports.getIssuerPage = async (req, res, next) => {
     roles: queryRoles,
     qrlink: qrcode,
     qrpin:pin,
-    creds: credentialTypes
+    sessionId: sessionId
   });
 };
+
+exports.postIssuerCallback = async (req, res, next) => {
+  // Collect the payload that was posted
+  var body = '';
+  req.on('data', function (data) {
+    body += data;
+  });
+
+  req.on('end', function () {
+    console.log(body);
+    // Ignoring api-key for now
+    // if ( req.headers['api-key'] != apiKey ) {
+    //   res.status(401).json({
+    //     'error': 'api-key wrong or missing'
+    //     });
+    //   return;
+    // }
+    var issuanceResponse = JSON.parse(body.toString());
+    var message = null;
+    // there are 2 different callbacks. 1 if the QR code is scanned (or deeplink has been followed)
+    // Scanning the QR code makes Authenticator download the specific request from the server
+    // the request will be deleted from the server immediately.
+    // That's why it is so important to capture this callback and relay this to the UI so the UI can hide
+    // the QR code to prevent the user from scanning it twice (resulting in an error since the request is already deleted)
+    if (issuanceResponse.requestStatus == 'request_retrieved') {
+      message = 'QR Code is scanned. Waiting for issuance to complete...';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'request_retrieved',
+          message: message,
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+    // The second callback is when the issuance is completed
+    if (issuanceResponse.requestStatus == 'issuance_successful') {
+      message = 'Credential successfully issued';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'issuance_successful',
+          message: message,
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+    // Optional callback when issuance failed
+    if (issuanceResponse.requestStatus == 'issuance_error') {
+      message = 'QR Code is scanned. Waiting for issuance to complete...';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'issuance_error',
+          "message": issuanceResponse.error.message,
+          "payload" :issuanceResponse.error.code
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+  });
+};
+
+exports.getIssuanceResponse = (req, res, next) => {
+  let id = req.query.id;
+  serverSideSession.get( id, (error, sessionval) => {
+    if (sessionval && sessionval.sessionData) {
+      console.log(`status: ${sessionval.sessionData.status}, message: ${sessionval.sessionData.message}`);
+      res.status(200).json(sessionval.sessionData);   
+      }
+  })
+}
+
 exports.getManagePage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,
