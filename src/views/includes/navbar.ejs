@@ -1,49 +1,39 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">
-      <img src="/transactlogo.png" alt="logo" class="img-fluid" />
-      <img
-        src="/usdmedallion.png"
-        alt="u of san diego logo"
-        class="img-fluid"
-      />
-    </a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#vcnavbar"
-      aria-controls="vcnavbar"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="vcnavbar">
-      <ul class="navbar-nav me-auto mb-2 mb-md-0">
-        <% if (isAuthenticated) { %>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="home"
-            >Get Credential</a
-          >
-        </li>
-
-        <% if (roles =="verifier" ) { %>
-        <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="verifier"
-            >Verify Credential</a
-          >
-        </li>
-        <% } else if (roles =="issuer" ) { %>
-        <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="issuer">Admin</a>
-        </li>
-        <% } %>
-      </ul>
-      <div class="d-lg-flex col-lg-3 justify-content-lg-end">
-        <a class="btn btn-dark" href="/signout" role="button">Sign-out</a>
-        <% }%>
-      </div>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="/transactlogo.png" alt="logo" class="img-fluid">
+            <img src="/usdmedallion.png" alt="u of san diego logo" class="img-fluid">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vcnavbar"
+            aria-controls="vcnavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="vcnavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <% for(const role of roles) { %>
+                <% if (role=="verifier" ) { %>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="home">Get Credential</a>
+                </li>
+                <% } %>
+                <% if (role=="verifier" ) { %>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="verifierlist">Verify Credential</a>
+                </li>
+                <% } %>
+                <% if (role=="issuer" ) { %>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="issuer">Admin</a>
+                </li>
+                <% } %>
+                <% } %>
+            </ul>
+            <div class="d-lg-flex col-lg-3 justify-content-lg-end">
+                <% if (isAuthenticated) { %>
+                <a class="btn btn-dark" href="/signout" role="button">Sign-out</a>
+                <% }%>
+            </div>
+        </div>
     </div>
   </div>
 </nav>

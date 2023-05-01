@@ -1,8 +1,8 @@
-const axios = require("axios");
-const qs = require("qs");
-const jmespath = require("jmespath");
-const appSettings = require("../../appSettings")();
-const msal = require("@azure/msal-node");
+const axios = require ('axios');
+const qs = require ('qs');
+const jmespath = require ('jmespath');
+const appSettings = require ('../../appSettings') ();
+const msal = require ('@azure/msal-node');
 
 let msalConfig = {
   auth: {
@@ -137,135 +137,108 @@ getCredType = async (credTypeId) => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
-  // const credType = await getCredType(credTypeId);
-  const access_token = await getIssuanceAccessToken();
+getIssuanceRequest = async (req, claims) => {
+  const pincode = Math.floor (1000 + Math.random () * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
+  const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id;
+
+  // The following is Fake data
+  // Get the user attributes from the database query
+  const userAttributes = {
+    given_name: 'John',
+    family_name: 'Doe',
+    gpa: '3.7',
+    department: 'Computer Science',
+    major: 'Computational Linguistics',
+  };
+  //
+
   const payload = {
     includeQRCode: true,
     callback: {
-      url: `${baseUri}/issuanceCallback`,
+      url: `${appSettings.host.baseUri}/issuer/callback`, //this is the full callback URI which is where the success response is returned to
       state: sessionId,
     },
     authority: did,
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: credTypeId,
+    type: credType.rules.vc.type[0],
     manifest: credType.manifestUrl,
-    claims: {
-      given_name: "Megan",
-      family_name: "Bowen",
-    },
+    claims: userAttributes,
     pin: {
-      value: "3539",
+      value: pincode.toString (),
       length: 4,
     },
   };
-  let getResponse = await axios({
-    method: "post",
-    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/verifiableCredentials/createIssuanceRequest`,
-    headers: {
-      Authorization: "Bearer " + access_token,
-      "Content-Type": "application/json",
-    },
-    data: payload,
-  });
-  return getResponse.data;
+  console.log ('calling axios');
+  let getResponse;
+  try {
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+      },
+      data: payload,
+    });
+    return [getResponse.data, pincode];
+  } catch (error) {
+    console.log (error);
+  }
 };
 
 exports.getIssuanceRequest = getIssuanceRequest;
 
-getPresentationRequest = async (credTypeId, req) => {
-  let access_token = "";
-
-  try {
-    access_token = await getIssuanceAccessToken();
-  } catch (error) {
-    console.log(error);
-  }
-
-  // console.log(credType);
-  // console.log(access_token);
-
+getPresentationRequest = async (req, claims) => {
+  const pincode = Math.floor (1000 + Math.random () * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
+  const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id;
   const payload = {
     includeQRCode: true,
     includeReceipt: true,
-    authority: did, // defined above
+    authority: did,
     registration: {
-      clientName: "Veritable Credential Expert Verifier", // change to whatever, name of client
+      clientName: claims.name,
     },
     callback: {
-      // callback url for web application, comes from .env file
-      url: appSettings.host.baseUri + "/verifiercallback", // from appSettings
-      state: sessionId, // line 192
-      headers: {
-        "api-key": "OPTIONAL API-KEY for CALLBACK EVENTS",
-      },
-
-      includeQRCode: true,
-      callback: {
-        url: `${appSettings.host.baseUri}/issuer/callback`, //this is the full callback URI which is where the success response is returned to
-        state: sessionId,
-      },
-      authority: did,
-      registration: {
-        clientName: credType.displays[0].card.issuedBy,
-      },
-      type: credType.rules.vc.type[0],
-      manifest: credType.manifestUrl,
-      claims: userAttributes,
-      pin: {
-        value: pincode.toString(),
-        length: 4,
-      },
+      url: `${appSettings.host.baseUri}/verifierqr/callback`, //this is the full callback URI which is where the success response is returned to
+      state: sessionId,
     },
     requestedCredentials: [
       {
-        type: credTypeId,
-        purpose: "So we can see that you a veritable credentials expert", // change to whatever, shows on screen
-        acceptedIssuers: [
-          did, // same as 197
-        ],
-        configuration: {
-          validation: {
-            allowRevoked: false,
-            validateLinkedDomain: false,
-          },
-        },
+        type: credType.rules.vc.type[0],
+        purpose: `Present your credentials to ${claims.name}`,
+        acceptedIssuers: [did],
       },
     ],
+    configuration: {
+      validation: {
+        allowRevoked: false,
+        validateLinkedDomain: false,
+      },
+    },
   };
-
-  let getResponse = "";
+  let getResponse;
   try {
-    console.log("payload: ", payload);
-    // ask: mrinal, getting a 401 unauthorized error here - why?
-    getResponse = await axios({
-      method: "post",
-      url: "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest",
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest`,
       headers: {
-        Authorization: "Bearer " + access_token,
-        "Content-Type": "application/json",
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
       },
       data: payload,
     });
+    return getResponse.data;
   } catch (error) {
-    console.log(error);
+    console.log (error);
   }
-  console.log("getResponse: ", getResponse);
-  console.log("getResponse.data: ", getResponse.data);
-  // return getResponse.data;
-  // return getResponse.data ? getResponse.data : '';
-  return {
-    requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-    url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-    expiry: 1633017751,
-    qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
-  };
 };
 
 exports.getPresentationRequest = getPresentationRequest;
-
-// same format but in payload is different , presentation request
