@@ -143,6 +143,18 @@ getIssuanceRequest = async (req, claims) => {
   const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id;
+
+  // The following is Fake data
+  // Get the user attributes from the database query
+  const userAttributes = {
+    given_name: 'John',
+    family_name: 'Doe',
+    gpa: '3.7',
+    department: 'Computer Science',
+    major: 'Computational Linguistics',
+  };
+  //
+
   const payload = {
     includeQRCode: true,
     callback: {
@@ -153,11 +165,9 @@ getIssuanceRequest = async (req, claims) => {
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: req.query.credType,
+    type: credType.rules.vc.type[0],
     manifest: credType.manifestUrl,
-    claims: {
-      given_name: claims.name,
-    },
+    claims: userAttributes,
     pin: {
       value: pincode.toString (),
       length: 4,
@@ -182,3 +192,53 @@ getIssuanceRequest = async (req, claims) => {
 };
 
 exports.getIssuanceRequest = getIssuanceRequest;
+
+getPresentationRequest = async (req, claims) => {
+  const pincode = Math.floor (1000 + Math.random () * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
+  const access_token = await getIssuanceAccessToken ();
+  const sessionId = req.session.id;
+  const payload = {
+    includeQRCode: true,
+    includeReceipt: true,
+    authority: did,
+    registration: {
+      clientName: claims.name,
+    },
+    callback: {
+      url: `${appSettings.host.baseUri}/verifierqr/callback`, //this is the full callback URI which is where the success response is returned to
+      state: sessionId,
+    },
+    requestedCredentials: [
+      {
+        type: credType.rules.vc.type[0],
+        purpose: `Present your credentials to ${claims.name}`,
+        acceptedIssuers: [did],
+      },
+    ],
+    configuration: {
+      validation: {
+        allowRevoked: false,
+        validateLinkedDomain: false,
+      },
+    },
+  };
+  let getResponse;
+  try {
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest`,
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+      },
+      data: payload,
+    });
+    return getResponse.data;
+  } catch (error) {
+    console.log (error);
+  }
+};
+
+exports.getPresentationRequest = getPresentationRequest;
