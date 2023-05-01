@@ -340,7 +340,7 @@ exports.postVerifierQRCallback = async (req, res, next) => {
   });
 
   req.on('end', function () {
-    console.log(body);
+    // console.log(body);
     // Ignoring api-key for now
     // if ( req.headers['api-key'] != apiKey ) {
     //   res.status(401).json({

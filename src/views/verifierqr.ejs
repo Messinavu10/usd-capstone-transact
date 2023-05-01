@@ -10,6 +10,30 @@
     <link rel="stylesheet" href="/style.css">
     <title>Digital Credentials</title>
 
+    <script>
+        // Converts camel case to sentence case
+        function convertCamelCaseToSentenceCase(camelCaseString) {
+            var result = camelCaseString.replace(/([A-Z])/g, " $1");
+            var finalResult = result.charAt(0).toUpperCase() + result.slice(1);
+            return finalResult;
+        }
+
+        // Convert a json object to an html table
+        function jsonToTable(json) {
+            var table = '<table class="table table-striped table-bordered table-hover">';
+            for (var key in json) {
+                if (json.hasOwnProperty(key)) {
+                    table += '<tr>';
+                    table += '<th style="text-align:right">' + convertCamelCaseToSentenceCase(key) + '</th>';
+                    table += '<td style="text-align:left">' + json[key] + '</td>';
+                    table += '</tr>';
+                }
+            }
+            table += '</table>';
+            return table;
+        }
+    </script>
+
 </head>
 
 <body>
@@ -30,7 +54,7 @@
                         </p>
                     </div>
                 </small>
-                <div id="qrcode" class="d-flex align-items-center justify-content-center"></div>
+                <div id="qrcode" class="d-flex align-items-center justify-content-center" style="display:none"></div>
                 <div id="message-wrapper" style="text-align: center; display:none">
                     <div id="message"></div>
                     <br />
@@ -85,9 +109,9 @@
                             if (respMsg.status == 'presentation_verified') {
                                 document.getElementById('qrcode').style.display = "none";
                                 document.getElementById('message').innerHTML = respMsg.message;
-                                document.getElementById('payload').innerHTML = "Payload: " + JSON.stringify(
-                                    respMsg.payload[0].claims);
-                                document.getElementById('subject').innerHTML = "Please Verify";
+                                document.getElementById('payload').innerHTML = jsonToTable(respMsg.payload[
+                                    0].claims);
+                                document.getElementById('subject').innerHTML = "<h1>Please Verify</h1>";
                                 clearInterval(checkStatus);
                             }
                             if (respMsg.status == 'issuance_failed') {
