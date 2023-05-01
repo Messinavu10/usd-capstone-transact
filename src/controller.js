@@ -212,6 +212,7 @@ exports.getVerifierPage = async (req, res, next) => {
   // run some code to get the roles
   req.query["credtype"];
 
+  
   if (credentialTypes && claims) {
     res.render("verifier", {
       isAuthenticated: req.session.isAuthenticated,
@@ -250,21 +251,25 @@ exports.getVerifierPageQR = async (req, res, next) => {
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
   if (req.session?.idTokenClaims?.emails[0]) {
+    credentialTypes = await verifiedid.listCredType();
     queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
     //console.log(queryRoles["recordset"][0]["roleName"]); // {roleName: 'Holder'}
   }
 
+  
+
   try{
     
     presentationRequest = await verifiedid.getPresentationRequest(req.query.credType, req);
-    console.log("presentationRequest: ", presentationRequest);
   }
   catch (err){
     console.log("presentationRequest error: ", err);
-
+    
   }
   // res.render("verifierqr", {});
+  // console.log("presentationRequest: ", presentationRequest);
 
+  console.log(credentialTypes);
   res.render("verifierqr", {
     isAuthenticated: req.session.isAuthenticated,
     configured: isConfigured(req),
