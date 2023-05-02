@@ -20,6 +20,7 @@ const getRoutes = (mainController, authProvider, router)=>{
     router.get('/deletecreds', mainController.getDeleteCredentialsPage);
     // router.get('/verifier/callback', mainController.getCallbackpage);
     router.get('/verifier', mainController.getVerifierPage);
+    router.get('/verifierqr', mainController.getVerifierPageQR);
     router.get('/holder', mainController.getHolderpage);
     router.get('/existingcredtypes', mainController.getExistingCredTypes);
     router.get('/profile', mainController.getProfile);
