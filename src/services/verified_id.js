@@ -3,6 +3,7 @@ const qs = require ('qs');
 const jmespath = require ('jmespath');
 const appSettings = require('../../appSettings')();
 const msal = require ('@azure/msal-node');
+const { getUserAttribute } = require('./data');
 
 let msalConfig = {
   auth: {
@@ -137,17 +138,22 @@ getCredType = async (credTypeId) => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (req, claims,userAttributesdb) => { //need to make sure i'm getting the proper claims
+getIssuanceRequest = async (req, claims) => { //need to make sure i'm getting the proper claims
   const pincode = Math.floor(1000 + Math.random() * 9000);
   //console.log(pincode);
   const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id
+
+  const userAttr = await getUserAttribute(req.session.idTokenClaims.emails[0]);
   
-  const userAttributes = {  //fake data //need to make database calls for this
-    given_name: claims.name,
-    department: userAttributesdb.department,
-    birthday: userAttributesdb.birthday
+  const userAttributes = {
+    given_name: userAttr.firstName,
+    family_name: userAttr.lastName,
+    gpa: userAttr.gpa,
+    department: userAttr.department,
+    major: userAttr.major,
+    birthday: userAttr.birthday,
   };
 
   const payload = {

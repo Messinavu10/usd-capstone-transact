@@ -130,14 +130,7 @@ exports.getIssuerPage = async (req, res, next) => {
 
   var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
 
-  let userAttributesdb = {};
-  queryAttributes["recordset"].forEach( (element)  => {
-    userAttributesdb[element.attributeName] = element.attributeValue;
-  });
-
-  console.log(userAttributesdb);
-
-  let apioutput = await verifiedid.getIssuanceRequest(req, claims,userAttributesdb);
+  let apioutput = await verifiedid.getIssuanceRequest(req, claims);
   const qrcode = apioutput[0];
   const pin = apioutput[1];
   //console.log(qrcode);
