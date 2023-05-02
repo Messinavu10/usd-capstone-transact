@@ -3,6 +3,7 @@ const qs = require ('qs');
 const jmespath = require ('jmespath');
 const appSettings = require ('../../appSettings') ();
 const msal = require ('@azure/msal-node');
+const { getUserAttribute } = require('./data');
 
 let msalConfig = {
   auth: {
@@ -144,16 +145,20 @@ getIssuanceRequest = async (req, claims) => {
   const access_token = await getIssuanceAccessToken ();
   const sessionId = req.session.id;
 
+  const userAttr = await getUserAttribute(req.session.idTokenClaims.emails[0]);
   // The following is Fake data
   // Get the user attributes from the database query
   const userAttributes = {
-    given_name: 'John',
-    family_name: 'Doe',
-    gpa: '3.7',
-    department: 'Computer Science',
-    major: 'Computational Linguistics',
+    given_name: userAttr.firstName,
+    family_name: userAttr.lastName,
+    gpa: userAttr.gpa,
+    department: userAttr.department,
+    major: userAttr.major,
+    birthday: userAttr.birthday,
   };
   //
+
+
 
   const payload = {
     includeQRCode: true,

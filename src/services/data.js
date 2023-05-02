@@ -29,9 +29,56 @@ module.exports.getRoles = async (userEmail) => {
   var poolConnection = await poolConnect();
 
   const resultSet = await poolConnection.request().query(q);
-  const results = resultSet.recordset.map(x =>  x.roleName);
+  const results = resultSet.recordset.map((x) => x.roleName);
   console.log(results);
   return results; // array of roles from 0 to 2 roles
+};
+
+module.exports.getUserAttribute = async (userEmail) => {
+  const result = {
+    firstName: "",
+    lastName: "",
+    gpa: "",
+    department: "",
+    major: "",
+    birthday: "",
+  };
+
+  var q1 = `
+    SELECT userName
+    FROM USERS AS u
+    WHERE u.userEmail = '${userEmail}';
+    `;
+
+  var q2 = `
+    SELECT attributeName, attributeValue
+    FROM USERS AS u
+    INNER JOIN UserAttributes AS ua ON u.userID = ua.userID
+    WHERE u.userEmail = '${userEmail}';
+    `;
+
+  try {
+    var poolConnection = await poolConnect();
+
+    const name = await poolConnection.request().query(q1);
+    const userName = name.recordset[0].userName;
+    const otherAttr = await poolConnection.request().query(q2);
+    console.log("-------------------------");
+    console.log(otherAttr.recordset);
+
+    for (var i = 0; i < otherAttr.recordset.length; i++) {
+      const attr = otherAttr.recordset[i];
+      result[attr.attributeName] = attr.attributeValue;
+    }
+
+    // split the userName into first and last name
+    [result.firstName, result.lastName] = userName.split(" ");
+
+  } catch (err) {
+    console.log(err);
+  }
+
+  return result;
 };
 
 async function connectAndQuery(email) {

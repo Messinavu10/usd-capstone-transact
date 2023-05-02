@@ -107,6 +107,15 @@ exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
   let sessionId = req.session.id;
 
+  if (!sessionId) {
+    res.render('home', {
+      isAuthenticated: req.session.isAuthenticated,
+      configured: isConfigured(req),
+      roles: queryRoles,
+      list: credentialTypes,
+    });
+  }
+
   // Change these to be claims from the SQL query
   const claims = {
     name: req.session.idTokenClaims.name,
@@ -272,12 +281,15 @@ exports.getDeleteCredentialsPage = (req, res, next) => {
   });
 };
 exports.getVerifierListPage = async (req, res, next) => {
+  
   const claims = {
     name: req.session.idTokenClaims.name,
     preferred_username: req.session.idTokenClaims.preferred_username,
     oid: req.session.idTokenClaims.oid,
     sub: req.session.idTokenClaims.sub,
   };
+
+  
 
   var queryRoles = [];
 
@@ -302,7 +314,7 @@ exports.getVerifierQRPage = async (req, res, next) => {
 
   // Change these to be claims from the SQL query
   const claims = {
-    name: req.session.idTokenClaims.name,
+    name: req.session.idTokenClaims?.name,
   };
 
   if (req.session?.idTokenClaims?.emails[0]) {
