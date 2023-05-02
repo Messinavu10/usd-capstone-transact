@@ -106,7 +106,6 @@ exports.getHomePage = async (req, res, next) => {
 
 exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
-  //let credentialTypes = [];
   let sessionId = req.session.id;
 
   const claims = {
@@ -118,12 +117,19 @@ exports.getIssuerPage = async (req, res, next) => {
   //console.log(claims.name);
 
   if (req.session?.idTokenClaims?.emails[0]) {    
-    //credentialTypes = await verifiedid.listCredType();
-    //console.log(credentialTypes);
     queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
   }
 
-  let apioutput = await verifiedid.getIssuanceRequest(req, claims);
+  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
+
+  let userAttributesdb = {};
+  queryAttributes["recordset"].forEach( (element)  => {
+    userAttributesdb[element.attributeName] = element.attributeValue;
+  });
+
+  console.log(userAttributesdb);
+
+  let apioutput = await verifiedid.getIssuanceRequest(req, claims,userAttributesdb);
   const qrcode = apioutput[0];
   const pin = apioutput[1];
   //console.log(qrcode);
@@ -260,20 +266,7 @@ exports.getCreatePage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-// exports.getIssueCredentialsPage = (req, res, next) => {
-//   const claims = {
-//     name: req.session.idTokenClaims.name,
-//     preferred_username: req.session.idTokenClaims.preferred_username,
-//     oid: req.session.idTokenClaims.oid,
-//     sub: req.session.idTokenClaims.sub,
-//   };
 
-//   res.render("issuecreds", {
-//     isAuthenticated: req.session.isAuthenticated,
-//     claims: claims,
-//     configured: isConfigured(req),
-//   });
-// };
 exports.getDeleteCredentialsPage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,

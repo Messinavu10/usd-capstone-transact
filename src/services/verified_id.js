@@ -137,7 +137,7 @@ getCredType = async credTypeId => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (req, claims) => {
+getIssuanceRequest = async (req, claims,userAttributesdb) => { //need to make sure i'm getting the proper claims
   const pincode = Math.floor(1000 + Math.random() * 9000);
   //console.log(pincode);
   const credType = await getCredType (req.query.credType);
@@ -145,11 +145,9 @@ getIssuanceRequest = async (req, claims) => {
   const sessionId = req.session.id
   
   const userAttributes = {  //fake data //need to make database calls for this
-    given_name: 'John',
-    family_name: 'Doe',
-    gpa: '3.7',
-    department: 'Computer Science',
-    major: 'Computational Linguistics',
+    given_name: claims.name,
+    department: userAttributesdb.department,
+    birthday: userAttributesdb.birthday
   };
 
   const payload = {
