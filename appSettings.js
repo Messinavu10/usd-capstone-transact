@@ -5,7 +5,6 @@ const appSettings = () => {
     
     let port, baseUri;
     
-    // local development only
     if (domainName === 'localhost') {
         port = process.env.PORT || 8080;
         baseUri = `http://${domainName}:${port}`;
@@ -22,8 +21,6 @@ const appSettings = () => {
         baseUri = `https://${domainName}.azurewebsites.net`;
         console.log(`deploy to Azure baseUri = ${baseUri}`)
     }
-    
-    
     
     const app_settings_vals = {
         "host": {

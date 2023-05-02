@@ -1,11 +1,12 @@
-const axios = require("axios");
-const sql = require("mssql");
-const qs = require("qs");
-const jmespath = require("jmespath");
-const verifiedid = require("./services/verified_id");
-
+const axios = require('axios');
+const sql = require('mssql');
+const qs = require('qs');
+const verifiedid = require('./services/verified_id');
+const {getSessionStore} = require ('./utils/session');
 const getAttributes = require("./getattributes");
 const data = require("./services/data");
+const serverSideSession = getSessionStore ();
+module.exports.sessionStore = serverSideSession;
 
 // create another service file.
 const getRole = require("./services");
@@ -86,7 +87,8 @@ const isConfigured = (req) => {
 };
 
 exports.getHomePage = async (req, res, next) => {
-  let credentialTypes = [];
+  let credentialTypes = 
+  [];
   var queryRoles = [];
   // an array of objects
   //[{ "role": "issuer"},{ "role": "verifier"},] make it an array of strings condensation
@@ -112,33 +114,138 @@ exports.getHomePage = async (req, res, next) => {
 
 exports.getIssuerPage = async (req, res, next) => {
   var queryRoles = [];
+  let sessionId = req.session.id;
 
-    if (req.session?.idTokenClaims?.emails[0]) {    
-      credentialTypes = await verifiedid.listCredType();
-      queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
-    } 
-  //if (req.session?.idTokenClaims?.emails[0]) { 
-  //var queryRoles = await getRole(req.session.idTokenClaims.emails[0]); // call the functions
-  connectAndQuery(req.session.idTokenClaims.emails[0]).then((attributes) => {
-    const claims = {
-      name: req.session.idTokenClaims.name,
-      authEmail: req.session.idTokenClaims.emails[0],
-      preferred_username: req.session.idTokenClaims.preferred_username,
-      oid: req.session.idTokenClaims.oid,
-      sub: req.session.idTokenClaims.sub,
-      userName: attributes[0].userName,
-      userEmail: attributes[0].userEmail,
-      attributes: attributes,
-    };
-    res.render("issuer", {
-      isAuthenticated: req.session.isAuthenticated,
-      claims: claims,
-      configured: isConfigured(req),
-      roles: queryRoles
-    });
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+  //console.log(claims.name);
+
+  if (req.session?.idTokenClaims?.emails[0]) {    
+    queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
+  }
+
+  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
+
+  let userAttributesdb = {};
+  queryAttributes["recordset"].forEach( (element)  => {
+    userAttributesdb[element.attributeName] = element.attributeValue;
   });
-  //}//else (res.redirect("/home"));
+
+  console.log(userAttributesdb);
+
+  let apioutput = await verifiedid.getIssuanceRequest(req, claims,userAttributesdb);
+  const qrcode = apioutput[0];
+  const pin = apioutput[1];
+  //console.log(qrcode);
+  //console.log(pin);
+
+  serverSideSession.get( sessionId, (error, sessionVal) => {
+    var sessionData = {
+      "status" : 0,
+      "message": "Waiting for QR code to be scanned"
+    };
+    if ( sessionVal ) {
+      sessionVal.sessionData = sessionData;
+      serverSideSession.set( sessionId, sessionVal);  
+    }
+  });
+  
+  res.render("issuer", {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+    roles: queryRoles,
+    qrlink: qrcode,
+    qrpin:pin,
+    sessionId: sessionId
+  });
 };
+
+exports.postIssuerCallback = async (req, res, next) => {
+  // Collect the payload that was posted
+  var body = '';
+  req.on('data', function (data) {
+    body += data;
+  });
+
+  req.on('end', function () {
+    console.log(body);
+    // Ignoring api-key for now
+    // if ( req.headers['api-key'] != apiKey ) {
+    //   res.status(401).json({
+    //     'error': 'api-key wrong or missing'
+    //     });
+    //   return;
+    // }
+    var issuanceResponse = JSON.parse(body.toString());
+    var message = null;
+    // there are 2 different callbacks. 1 if the QR code is scanned (or deeplink has been followed)
+    // Scanning the QR code makes Authenticator download the specific request from the server
+    // the request will be deleted from the server immediately.
+    // That's why it is so important to capture this callback and relay this to the UI so the UI can hide
+    // the QR code to prevent the user from scanning it twice (resulting in an error since the request is already deleted)
+    if (issuanceResponse.requestStatus == 'request_retrieved') {
+      message = 'QR Code is scanned. Waiting for issuance to complete...';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'request_retrieved',
+          message: message,
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+    // The second callback is when the issuance is completed
+    if (issuanceResponse.requestStatus == 'issuance_successful') {
+      message = 'Credential successfully issued';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'issuance_successful',
+          message: message,
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+    // Optional callback when issuance failed
+    if (issuanceResponse.requestStatus == 'issuance_error') {
+      message = 'QR Code is scanned. Waiting for issuance to complete...';
+      serverSideSession.get(issuanceResponse.state, (error, sessionval) => {
+        var sessionData = {
+          status: 'issuance_error',
+          "message": issuanceResponse.error.message,
+          "payload" :issuanceResponse.error.code
+        };
+        sessionval.sessionData = sessionData;
+        serverSideSession.set(issuanceResponse.state, sessionval, (error) => {
+          res.send();
+        });
+      });
+    }
+
+  });
+};
+
+exports.getIssuanceResponse = (req, res, next) => {
+  let id = req.query.id;
+  serverSideSession.get( id, (error, sessionval) => {
+    if (sessionval && sessionval.sessionData) {
+      console.log(`status: ${sessionval.sessionData.status}, message: ${sessionval.sessionData.message}`);
+      res.status(200).json(sessionval.sessionData);   
+      }
+  })
+}
+
 exports.getManagePage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,
@@ -167,20 +274,7 @@ exports.getCreatePage = (req, res, next) => {
     configured: isConfigured(req),
   });
 };
-exports.getIssueCredentialsPage = (req, res, next) => {
-  const claims = {
-    name: req.session.idTokenClaims.name,
-    preferred_username: req.session.idTokenClaims.preferred_username,
-    oid: req.session.idTokenClaims.oid,
-    sub: req.session.idTokenClaims.sub,
-  };
 
-  res.render("issuecreds", {
-    isAuthenticated: req.session.isAuthenticated,
-    claims: claims,
-    configured: isConfigured(req),
-  });
-};
 exports.getDeleteCredentialsPage = (req, res, next) => {
   const claims = {
     name: req.session.idTokenClaims.name,

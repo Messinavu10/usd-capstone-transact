@@ -1,8 +1,8 @@
-const axios = require("axios");
-const qs = require("qs");
-const jmespath = require("jmespath");
+const axios = require ('axios');
+const qs = require ('qs');
+const jmespath = require ('jmespath');
 const appSettings = require('../../appSettings')();
-const msal = require("@azure/msal-node");
+const msal = require ('@azure/msal-node');
 
 let msalConfig = {
   auth: {
@@ -137,117 +137,52 @@ getCredType = async (credTypeId) => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (credTypeId, baseUri, req, sessionStore, claims) => {
-  const credType = await getCredType(credTypeId);
-  const access_token = await getIssuanceAccessToken();
-  const sessionId = req.session.id;
+getIssuanceRequest = async (req, claims,userAttributesdb) => { //need to make sure i'm getting the proper claims
+  const pincode = Math.floor(1000 + Math.random() * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
+  const access_token = await getIssuanceAccessToken ();
+  const sessionId = req.session.id
+  
+  const userAttributes = {  //fake data //need to make database calls for this
+    given_name: claims.name,
+    department: userAttributesdb.department,
+    birthday: userAttributesdb.birthday
+  };
+
   const payload = {
     includeQRCode: true,
     callback: {
-      url: `${baseUri}/issuanceCallback`,
+      url: `${appSettings.host.baseUri}/issuer/callback`, //change to usetransactvc url? //appSettings.host.baseUri
       state: sessionId,
     },
     authority: did,
     registration: {
       clientName: credType.displays[0].card.issuedBy,
     },
-    type: credType.name,
+    type: credType.rules.vc.type[0],
     manifest: credType.manifestUrl,
-    claims: {
-      given_name: "Megan",
-      family_name: "Bowen",
-    },
+    claims: userAttributes,
     pin: {
-      value: "3539",
-      length: 4,
+      value:pincode.toString(),
+      length:4
     },
   };
-  let getResponse = await axios({
-    method: "post",
-    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/verifiableCredentials/createIssuanceRequest`,
+  console.log('calling axios');
+  let getResponse;
+  try{
+  getResponse = await axios ({
+    method: 'post',
+    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
     headers: {
-      Authorization: "Bearer " + access_token,
-      "Content-Type": "application/json",
+      Authorization: 'Bearer ' + access_token,
+      'Content-Type': 'application/json',
     },
-    data: payload,
+    data: payload
   });
-  return getResponse.data;
+  return [getResponse.data,pincode];
+} catch (error) {
+  console.log(error);
+}
 };
-
 exports.getIssuanceRequest = getIssuanceRequest;
-
-getPresentationRequest = async (credTypeId, req) => {
-
-  let access_token = "";
-
-  try {
-    access_token = await getIssuanceAccessToken();
-  } catch (error) {
-    console.log(error);
-  }
-
-  // console.log(credType);
-  // console.log(access_token);
-
-  const sessionId = req.session.id;
-  const payload = {
-    includeQRCode: true,
-    includeReceipt: true,
-    authority: did,  // defined above
-    registration: {
-      clientName: "Veritable Credential Expert Verifier",  // change to whatever, name of client
-    },
-    callback: {   // callback url for web application, comes from .env file
-      url: appSettings.host.baseUri,  // from appSettings
-      state: sessionId, // line 192
-      headers: {
-        "api-key": "OPTIONAL API-KEY for CALLBACK EVENTS",
-      },
-    },
-    requestedCredentials: [
-      {
-        type: credTypeId,
-        purpose: "So we can see that you a veritable credentials expert", // change to whatever, shows on screen
-        acceptedIssuers: [
-          did, // same as 197
-        ],
-        configuration: {
-          validation: {
-            allowRevoked: false,
-            validateLinkedDomain: false,
-          },
-        },
-      },
-    ],
-  };
-
-  let getResponse = "";
-  try {
-    // ask: mrinal, getting a 401 unauthorized error here - why?
-    getResponse = await axios({
-      method: "post",
-      url: "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest",
-      headers: {
-        Authorization: "Bearer " + access_token,
-        "Content-Type": "application/json",
-      },
-      data: payload,
-    });
-
-    console.log(getResponse.data);
-  } catch (error) {
-    console.log(error);
-  }
-
-  // return getResponse.data ? getResponse.data : '';
-  // return {
-  //   requestId: "e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-  //   url: "openid://vc/?request_uri=https://verifiedid.did.msidentity.com/v1.0/12345678-0000-0000-0000-000000000000/verifiableCredentials/request/e4ef27ca-eb8c-4b63-823b-3b95140eac11",
-  //   expiry: 1633017751,
-  //   qrCode: "data:image/png;base64,iVBORw0KGgoA<SNIP>",
-  // };
-};
-
-exports.getPresentationRequest = getPresentationRequest;
-
-// same format but in payload is different , presentation request
