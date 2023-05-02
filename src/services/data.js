@@ -35,17 +35,10 @@ module.exports.getRoles = async (userEmail) => {
 };
 
 module.exports.getUserAttribute = async (userEmail) => {
-  const result = {
-    firstName: "",
-    lastName: "",
-    gpa: "",
-    department: "",
-    major: "",
-    birthday: "",
-  };
+  const result = {};
 
   var q1 = `
-    SELECT userName
+    SELECT firstName,lastName,userEmail
     FROM USERS AS u
     WHERE u.userEmail = '${userEmail}';
     `;
@@ -61,7 +54,6 @@ module.exports.getUserAttribute = async (userEmail) => {
     var poolConnection = await poolConnect();
 
     const name = await poolConnection.request().query(q1);
-    const userName = name.recordset[0].userName;
     const otherAttr = await poolConnection.request().query(q2);
     console.log("-------------------------");
     console.log(otherAttr.recordset);
@@ -70,10 +62,9 @@ module.exports.getUserAttribute = async (userEmail) => {
       const attr = otherAttr.recordset[i];
       result[attr.attributeName] = attr.attributeValue;
     }
-
-    // split the userName into first and last name
-    [result.firstName, result.lastName] = userName.split(" ");
-
+     result['firstName'] = name.recordset[0].firstName;
+     result['lastName'] = name.recordset[0].lastName;
+     result['userEmail'] = name.recordset[0].userEmail;
   } catch (err) {
     console.log(err);
   }
