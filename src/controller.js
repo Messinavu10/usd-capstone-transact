@@ -120,8 +120,6 @@ exports.getIssuerPage = async (req, res, next) => {
     queryRoles = await data.getRoles(req.session.idTokenClaims.emails[0]);
   }
 
-  var queryAttributes = await getAttributes(req.session.idTokenClaims.emails[0]);
-
   let apioutput = await verifiedid.getIssuanceRequest(req, claims);
   const qrcode = apioutput[0];
   const pin = apioutput[1];

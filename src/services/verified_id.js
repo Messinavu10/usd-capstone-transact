@@ -146,7 +146,7 @@ getIssuanceRequest = async (req, claims) => { //need to make sure i'm getting th
   const sessionId = req.session.id
 
   const userAttr = await getUserAttribute(req.session.idTokenClaims.emails[0]);
-  
+
   const userAttributes = {
     given_name: userAttr.firstName,
     family_name: userAttr.lastName,
