@@ -31,7 +31,7 @@ module.exports.getRoles = async (userEmail) => {
   const resultSet = await poolConnection.request().query(q);
   const results = resultSet.recordset.map((x) => x.roleName);
   // const results = resultSet.recordset.map((x) => x.roleName);
-  console.log(results);
+  // console.log(results);
   return results; // array of roles from 0 to 2 roles
 };
 

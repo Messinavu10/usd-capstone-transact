@@ -60,7 +60,7 @@ const appSettings = () => {
         }
 
     }
-    console.log(JSON.stringify(app_settings_vals));
+    // console.log(JSON.stringify(app_settings_vals));
     return app_settings_vals;
 }
 

@@ -171,7 +171,7 @@ class AuthProvider {
                     try {
                         // exchange auth code for tokens
                         const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest)
-                        console.log("\nResponse: \n:", tokenResponse);
+                        // console.log("\nResponse: \n:", tokenResponse);
 
                         if (this.tokenValidator.validateIdToken(tokenResponse.idTokenClaims)) {
 
