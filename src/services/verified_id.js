@@ -195,7 +195,6 @@ getIssuanceRequest = async (req, claims) => {
     console.log (error);
   }
 };
-
 exports.getIssuanceRequest = getIssuanceRequest;
 
 getPresentationRequest = async (req, claims) => {
