@@ -1,7 +1,7 @@
 const axios = require ('axios');
 const qs = require ('qs');
 const jmespath = require ('jmespath');
-const appSettings = require('../../appSettings')();
+const appSettings = require ('../../appSettings') ();
 const msal = require ('@azure/msal-node');
 const { getUserAttribute } = require('./data');
 
@@ -138,28 +138,32 @@ getCredType = async (credTypeId) => {
   return getResponse.data;
 };
 
-getIssuanceRequest = async (req, claims) => { //need to make sure i'm getting the proper claims
-  const pincode = Math.floor(1000 + Math.random() * 9000);
+getIssuanceRequest = async (req, claims) => {
+  const pincode = Math.floor (1000 + Math.random () * 9000);
   //console.log(pincode);
   const credType = await getCredType (req.query.credType);
   const access_token = await getIssuanceAccessToken ();
-  const sessionId = req.session.id
+  const sessionId = req.session.id;
 
   const userAttr = await getUserAttribute(req.session.idTokenClaims.emails[0]);
-  //console.log(userAttr);
-
+  // The following is Fake data
+  // Get the user attributes from the database query
   const userAttributes = {
     given_name: userAttr.firstName,
     family_name: userAttr.lastName,
     gpa: userAttr.gpa,
     department: userAttr.department,
-    major: userAttr.major
+    major: userAttr.major,
+    birthday: userAttr.birthday,
   };
+  //
+
+
 
   const payload = {
     includeQRCode: true,
     callback: {
-      url: `${appSettings.host.baseUri}/issuer/callback`, //change to usetransactvc url? //appSettings.host.baseUri
+      url: `${appSettings.host.baseUri}/issuer/callback`, //this is the full callback URI which is where the success response is returned to
       state: sessionId,
     },
     authority: did,
@@ -170,25 +174,75 @@ getIssuanceRequest = async (req, claims) => { //need to make sure i'm getting th
     manifest: credType.manifestUrl,
     claims: userAttributes,
     pin: {
-      value:pincode.toString(),
-      length:4
+      value: pincode.toString (),
+      length: 4,
     },
   };
-  console.log('calling axios');
+  console.log ('calling axios');
   let getResponse;
-  try{
-  getResponse = await axios ({
-    method: 'post',
-    url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
-    headers: {
-      Authorization: 'Bearer ' + access_token,
-      'Content-Type': 'application/json',
-    },
-    data: payload
-  });
-  return [getResponse.data,pincode];
-} catch (error) {
-  console.log(error);
-}
+  try {
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createIssuanceRequest`,
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+      },
+      data: payload,
+    });
+    return [getResponse.data, pincode];
+  } catch (error) {
+    console.log (error);
+  }
 };
 exports.getIssuanceRequest = getIssuanceRequest;
+
+getPresentationRequest = async (req, claims) => {
+  const pincode = Math.floor (1000 + Math.random () * 9000);
+  //console.log(pincode);
+  const credType = await getCredType (req.query.credType);
+  const access_token = await getIssuanceAccessToken ();
+  const sessionId = req.session.id;
+  const payload = {
+    includeQRCode: true,
+    includeReceipt: true,
+    authority: did,
+    registration: {
+      clientName: claims.name,
+    },
+    callback: {
+      url: `${appSettings.host.baseUri}/verifierqr/callback`, //this is the full callback URI which is where the success response is returned to
+      state: sessionId,
+    },
+    requestedCredentials: [
+      {
+        type: credType.rules.vc.type[0],
+        purpose: `Present your credentials to ${claims.name}`,
+        acceptedIssuers: [did],
+      },
+    ],
+    configuration: {
+      validation: {
+        allowRevoked: false,
+        validateLinkedDomain: false,
+      },
+    },
+  };
+  let getResponse;
+  try {
+    getResponse = await axios ({
+      method: 'post',
+      url: `https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/createPresentationRequest`,
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+      },
+      data: payload,
+    });
+    return getResponse.data;
+  } catch (error) {
+    console.log (error);
+  }
+};
+
+exports.getPresentationRequest = getPresentationRequest;

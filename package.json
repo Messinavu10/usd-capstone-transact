@@ -13,6 +13,7 @@
     "@azure/msal-common": "^4.2.1",
     "@azure/msal-node": "^1.0.3",
     "axios": "^0.21.0",
+    "body-parser": "^1.20.2",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",

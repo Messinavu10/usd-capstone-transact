@@ -30,11 +30,15 @@ module.exports.getRoles = async (userEmail) => {
 
   const resultSet = await poolConnection.request().query(q);
   const results = resultSet.recordset.map((x) => x.roleName);
+  // const results = resultSet.recordset.map((x) => x.roleName);
   console.log(results);
   return results; // array of roles from 0 to 2 roles
 };
 
 module.exports.getUserAttribute = async (userEmail) => {
+
+
+
   const result = {};
 
   var q1 = `
@@ -99,13 +103,7 @@ async function connectAndQuery(email) {
     var rows = [];
     resultSet.recordset.forEach((row) => {
       rows.push(row);
-      console.log(
-        "%s\t%s\t%s\t%s",
-        row.userName,
-        row.userEmail,
-        row.attributeName,
-        row.attributeValue
-      );
+ 
     });
 
     // close connection only when we're certain application is finished
