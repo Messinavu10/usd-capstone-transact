@@ -1,4 +1,6 @@
+const axios = require('axios');
 const sql = require('mssql');
+const qs = require('qs');
 const verifiedid = require('./services/verified_id');
 const {getSessionStore} = require ('./utils/session');
 const getAttributes = require('./getattributes');
@@ -6,6 +8,8 @@ const data = require('./services/data');
 const serverSideSession = getSessionStore ();
 
 module.exports.sessionStore = serverSideSession;
+
+
 
 const config = {
   user: process.env.DB_USERNAME, // better stored in an app setting such as process.env.DB_USER
@@ -20,6 +24,50 @@ const config = {
     encrypt: true,
   },
 };
+async function connectAndQuery(email) {
+  try {
+    console.log(JSON.stringify(config), '\n\n');
+    var poolConnection = await sql.connect(config);
+
+    console.log('Reading rows from the Table...');
+    var q = `SELECT USERS.userName, USERS.userEmail, ua.attributeName, ua.attributeValue
+        FROM USERS
+        INNER JOIN UserAttributes AS ua ON USERS.userID = ua.userID
+        WHERE USERS.userEmail = '${email}';`;
+    console.log(q);
+    var resultSet = await poolConnection.request().query(q);
+
+    console.log(`${resultSet.recordset.length} rows returned.`);
+
+    // output column headers
+    var columns = '';
+    for (var column in resultSet.recordset.columns) {
+      columns += column + ', ';
+    }
+    console.log('%s\t', columns.substring(0, columns.length - 2));
+
+    // ouput row contents from default record set
+    var rows = [];
+    resultSet.recordset.forEach((row) => {
+      rows.push(row);
+      console.log(
+        '%s\t%s\t%s\t%s',
+        row.userName,
+        row.userEmail,
+        row.attributeName,
+        row.attributeValue
+      );
+    });
+
+    // close connection only when we're certain application is finished
+    poolConnection.close();
+  } catch (err) {
+    console.error(err.message);
+  }
+  return rows;
+}
+
+const fetchManager = require('./utils/fetchManager');
 
 const isConfigured = (req) => {
   if (
@@ -188,6 +236,50 @@ exports.getIssueanceResponse = (req, res, next) => {
   })
 }
 
+
+exports.getManagePage = (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+
+  res.render('manage', {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+  });
+};
+exports.getCreatePage = (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+
+  res.render('create', {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+  });
+};
+
+exports.getDeleteCredentialsPage = (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+
+  res.render('deletecreds', {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+  });
+};
 exports.getVerifierListPage = async (req, res, next) => {
   
   const claims = {
@@ -196,6 +288,9 @@ exports.getVerifierListPage = async (req, res, next) => {
     oid: req.session.idTokenClaims.oid,
     sub: req.session.idTokenClaims.sub,
   };
+
+  
+
   var queryRoles = [];
 
   if (req.session?.idTokenClaims?.emails[0]) {
@@ -321,6 +416,34 @@ exports.getVerifierResponse = (req, res, next) => {
       }
   })
 }
+
+exports.getHolderpage = (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+
+  res.render('holder', {
+    isAuthenticated: req.session.isAuthenticated,
+    claims: claims,
+    configured: isConfigured(req),
+  });
+};
+exports.getExistingCredTypes = (req, res, next) => {
+  const claims = {
+    name: req.session.idTokenClaims.name,
+    preferred_username: req.session.idTokenClaims.preferred_username,
+    oid: req.session.idTokenClaims.oid,
+    sub: req.session.idTokenClaims.sub,
+  };
+
+  res.render('existingcredtypes', {
+    isAuthenticated: req.session.isAuthenticated,
+    configured: isConfigured(req),
+  });
+};
 
 exports.getProfile = async (req, res, next) => {
   const claims = {

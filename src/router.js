@@ -14,11 +14,18 @@ const getRoutes = (mainController, authProvider, router) => {
   // secure routes
   router.post ('/issuer/callback', mainController.postIssuerCallback);
   router.get ('/issuer', mainController.getIssuerPage);
+  router.get ('/manage', mainController.getManagePage);
+  router.get ('/create', mainController.getCreatePage);
+  //router.get('/issuecreds', mainController.getIssueCredentialsPage);
+  router.get ('/deletecreds', mainController.getDeleteCredentialsPage);
+  // router.get('/verifier/callback', mainController.getCallbackpage);
   router.post ('/verifierqr/callback', mainController.postVerifierQRCallback);
   router.get ('/verifierqr', mainController.getVerifierQRPage);
   router.get ('/verifier-response', mainController.getVerifierResponse);
   router.get ('/verifierlist', mainController.getVerifierListPage);
   router.get ('/issuance-response', mainController.getIssueanceResponse);
+  router.get ('/holder', mainController.getHolderpage);
+  router.get ('/existingcredtypes', mainController.getExistingCredTypes);
   router.get ('/profile', mainController.getProfile);
   //will add isauthenticated after testing
 
