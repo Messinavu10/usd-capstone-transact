@@ -16,6 +16,10 @@
 
     <%- include('includes/navbar', {isAuthenticated: isAuthenticated, configured, roles}); %>
         <% if (isAuthenticated) { %>
+            <div class="center"> 
+                <h5 style="color:rgba(8, 55, 90, 0.75);">Please Select a Credential</h5>
+                </div>
+
             <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-4 align-items-center justify-content-center">
                 <div class="list-group">
                     <% list.forEach((creds)=>{%>
@@ -55,36 +59,48 @@
                 <div><br><br><br></div>
 
                 <% } %>
-                <div class="d-flex justify-content-center">
-                    <div class="row justify-content-md-center">
-                        <div id="google-app-div" class="col-sm-auto">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <img id="logo" src="/googleqr.png" alt="google play store qr code"
-                                        style="width:10em">
-                                    <div>
-                                        <h10 class="card-description">Google Play
-                                        </h10>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="apple-app-div" class="col-sm-auto">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <img id="logo" src="/appleqr.png" alt="app store qr code" style="width:10em">
-                                    <div>
-                                    <h10 class="card-description">App Store</h10>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                     <% if (isAuthenticated) { %>
                         <br>
                         <% } else { %>
+
+                            <div class="d-flex justify-content-center">
+                                <div class="row justify-content-md-center">
+                                    <div id="google-app-div" class="col-sm-auto">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <img id="logo" src="/googleqr.png" alt="google play store qr code"
+                                                    style="width:10em">
+                                                <div>
+                                                    <h10 class="card-description">Google Play
+                                                    </h10>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="apple-app-div" class="col-sm-auto">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <img id="logo" src="/appleqr.png" alt="app store qr code" style="width:10em">
+                                                <div>
+                                                <h10 class="card-description">App Store</h10>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                            <h10>Please install the MS Authenticator App</h10>
+                            </div>
+            
+
+
+
+
+
+
+
+
                             <div class="ocean">
                                 <div class="wave"></div>
                                 <div class="wave"></div>
