@@ -3,9 +3,9 @@
 Project Description: Credential management application targeting college students, faculty, and surrounding business owners to create and verify credentials.
 
 # Deployed web application
-    ```bash
-    https://usdtransactvc.azurewebsites.net/home
-    ```
+   
+  Link: https://usdtransactvc.azurewebsites.net/home
+    
 
 ## Usage (Running the app locally)
 
